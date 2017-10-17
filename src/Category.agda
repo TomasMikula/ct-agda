@@ -33,6 +33,19 @@ record Category {n m : Level} : Set (lsuc (n ⊔ m)) where
   _>>_ : { A B C : Obj } -> (Hom A B) -> (Hom B C) -> (Hom A C)
   f >> g  = g ∘ f
 
+op : {n m : Level} -> Category {n} {m} -> Category {n} {m}
+op 𝒞 = record
+         { Obj = Obj
+         ; Hom = λ A B → Hom B A
+         ; id = id
+         ; _∘_ = λ f g → g ∘ f
+         ; left_id = right_id
+         ; right_id = left_id
+         ; assoc = λ f g h → flipEq (assoc h g f)
+         }
+       where
+         open Category 𝒞
+
 
 -- Category of sets and functions
 Sets : Category
