@@ -27,14 +27,14 @@ record Category {n m : Level} : Set (lsuc (n ⊔ m)) where
     Obj : Set n
     Hom : (A B : Obj) -> Set m
     
-    id : { A : Obj } -> Hom A A
-    _∘_  : { A B C : Obj } -> (Hom B C) -> (Hom A B) -> (Hom A C)
+    id : {A : Obj} -> Hom A A
+    _∘_  : {A B C : Obj} -> (Hom B C) -> (Hom A B) -> (Hom A C)
     
-    left_id  : { A B : Obj } -> (f : Hom A B) -> (id ∘ f ≡ f)
-    right_id : { A B : Obj } -> (f : Hom A B) -> (f ∘ id ≡ f)
-    assoc : { A B C D : Obj } -> (f : Hom C D) -> (g : Hom B C) -> (h : Hom A B) -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
+    left_id  : {A B : Obj} {f : Hom A B} -> (id ∘ f ≡ f)
+    right_id : {A B : Obj} {f : Hom A B} -> (f ∘ id ≡ f)
+    assoc : {A B C D : Obj} {f : Hom C D} {g : Hom B C} {h : Hom A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
 
-  _>>_ : { A B C : Obj } -> (Hom A B) -> (Hom B C) -> (Hom A C)
+  _>>_ : {A B C : Obj} -> (Hom A B) -> (Hom B C) -> (Hom A C)
   f >> g  = g ∘ f
 
 op : {n m : Level} -> Category {n} {m} -> Category {n} {m}
@@ -45,7 +45,7 @@ op 𝒞 = record
          ; _∘_ = λ f g → g ∘ f
          ; left_id = right_id
          ; right_id = left_id
-         ; assoc = λ f g h → flipEq (assoc h g f)
+         ; assoc = λ {f g h} → flipEq (assoc)
          }
        where
          open Category 𝒞
@@ -59,9 +59,9 @@ Sets = record
          ; id = λ x → x
          ; _∘_ = λ f g x → f (g x)
 
-         ; left_id = λ f → refl
-         ; right_id = λ f → refl
-         ; assoc = λ f g h → refl
+         ; left_id = λ {f} → refl
+         ; right_id = λ {f} → refl
+         ; assoc = λ {f g h} → refl
          }
 
 
@@ -98,9 +98,9 @@ module Morphisms {n m : Level} (𝒞 : Category {n} {m}) where
   section_is_mono {f = f} s = mono λ {x} → λ {g} → λ {h} → λ p → 
     let
       p1 = (λ fg -> retraction ∘ fg) $= p
-      p2 = (assoc _ _ _) =>>= p1 =>>= flipEq (assoc _ _ _)
+      p2 = assoc =>>= p1 =>>= flipEq assoc
       p3 = flipEq ((λ i -> i ∘ g) $= evidence) =>>= p2 =>>= ((λ i -> i ∘ h) $= evidence)
-      p4 = flipEq (left_id _) =>>= p3 =>>= (left_id _)
+      p4 = flipEq left_id =>>= p3 =>>= left_id
     in p4 where
       open Section s
 
@@ -108,9 +108,9 @@ module Morphisms {n m : Level} (𝒞 : Category {n} {m}) where
   retraction_is_epi {f = f} r = epi λ {x} → λ {g} → λ {h} → λ p → 
     let
       p1 = (λ gf -> gf ∘ section) $= p
-      p2 = flipEq (assoc _ _ _) =>>= p1 =>>= (assoc _ _ _)
+      p2 = flipEq assoc =>>= p1 =>>= assoc
       p3 = flipEq ((λ i -> g ∘ i) $= evidence) =>>= p2 =>>= ((λ i -> h ∘ i) $= evidence)
-      p4 = flipEq (right_id _) =>>= p3 =>>= (right_id _)
+      p4 = flipEq right_id =>>= p3 =>>= right_id
     in p4 where
       open Retraction r
 
@@ -123,7 +123,7 @@ module Morphisms {n m : Level} (𝒞 : Category {n} {m}) where
   mono_retraction_is_iso : {A B : Obj} {f : Hom A B} -> Mono f -> Retraction f -> Iso f
   mono_retraction_is_iso {f = f} m r =
     record { inverse = section
-           ; leftInverse = elimL (flipEq (assoc _ _ _) =>>= ((λ i -> i ∘ f) $= evidence) =>>= left_id f =>>= flipEq (right_id f))
+           ; leftInverse = elimL (flipEq assoc =>>= ((λ i -> i ∘ f) $= evidence) =>>= left_id =>>= flipEq right_id)
            ; rightInverse = evidence
            }
     where
@@ -134,7 +134,7 @@ module Morphisms {n m : Level} (𝒞 : Category {n} {m}) where
   epi_section_is_iso {f = f} e s =
     record { inverse = retraction
            ; leftInverse = evidence
-           ; rightInverse = elimR ((assoc _ _ _) =>>= ((λ i -> f ∘ i) $= evidence) =>>= right_id f =>>= flipEq (left_id f))
+           ; rightInverse = elimR (assoc =>>= ((λ i -> f ∘ i) $= evidence) =>>= right_id =>>= flipEq left_id)
            }
     where
       open Epi e
@@ -164,12 +164,12 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
       open SpanReduction yz renaming (u to u_yz ; ev₁ to ev_yz₁ ; ev₂ to ev_yz₂)
       open SpanReduction xy renaming (u to u_xy ; ev₁ to ev_xy₁ ; ev₂ to ev_xy₂)
     in record { u = u_yz ∘ u_xy
-              ; ev₁ = flipEq (assoc _ _ _) =>>= ((λ y -> y ∘ u_xy) $= ev_yz₁) =>>= ev_xy₁
-              ; ev₂ = flipEq (assoc _ _ _) =>>= ((λ y -> y ∘ u_xy) $= ev_yz₂) =>>= ev_xy₂
+              ; ev₁ = flipEq assoc =>>= ((λ y -> y ∘ u_xy) $= ev_yz₁) =>>= ev_xy₁
+              ; ev₂ = flipEq assoc =>>= ((λ y -> y ∘ u_xy) $= ev_yz₂) =>>= ev_xy₂
               }
 
   identitySpanReduction : {A A₁ A₂ : Obj} (s : Span A A₁ A₂) -> SpanReduction s s
-  identitySpanReduction s = record { u = id ; ev₁ = right_id _ ; ev₂ = right_id _ }
+  identitySpanReduction s = record { u = id ; ev₁ = right_id ; ev₂ = right_id }
 
   record UniqueSpanReduction {X A A₁ A₂ : Obj} (s : Span X A₁ A₂) (r : Span A A₁ A₂) : Set m where
     field
@@ -218,13 +218,13 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
   composeEqualizingReductions : {A B : Obj} {f g : Hom A B} {c d e : Equalizing f g} -> EqualizingReduction d e -> EqualizingReduction c d -> EqualizingReduction c e
   composeEqualizingReductions de cd =
     record { u = u_de ∘ u_cd
-           ; ev = flipEq (assoc _ _ _) =>>= ((λ u -> u ∘ u_cd) $= ev_de) =>>= ev_cd
+           ; ev = flipEq assoc =>>= ((λ u -> u ∘ u_cd) $= ev_de) =>>= ev_cd
            } where
                open EqualizingReduction de renaming (u to u_de ; ev to ev_de)
                open EqualizingReduction cd renaming (u to u_cd ; ev to ev_cd)
 
   identityEqualizingReduction : {A B : Obj} {f g : Hom A B} (e : Equalizing f g) -> EqualizingReduction e e
-  identityEqualizingReduction e = record { u = id ; ev = right_id _ }
+  identityEqualizingReduction e = record { u = id ; ev = right_id }
 
   record UniqueEqualizingReduction {A B : Obj} {f g : Hom A B} (eq₂ : Equalizing f g) (eq : Equalizing f g) : Set (n ⊔ m) where
     field
@@ -261,9 +261,9 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
                let
                  open Equalizing eq using (e)
                in record { reduction = record { u = e
-                                              ; ev = left_id _
+                                              ; ev = left_id
                                               }
-                         ; unique = λ red₂ → flipEq (left_id _) =>>= EqualizingReduction.ev red₂
+                         ; unique = λ red₂ → flipEq left_id =>>= EqualizingReduction.ev red₂
                          }
            }
 
@@ -285,14 +285,14 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
   composePullingBackReductions : {C A B : Obj} {f : Hom A C} {g : Hom B C} {p q r : PullingBack f g} -> PullingBackReduction q r -> PullingBackReduction p q -> PullingBackReduction p r
   composePullingBackReductions qr pq =
     record { u = u_qr ∘ u_pq
-           ; ev₁ = flipEq (assoc _ _ _) =>>= ((λ f -> f ∘ u_pq) $= ev_qr₁) =>>= ev_pq₁
-           ; ev₂ = flipEq (assoc _ _ _) =>>= ((λ g -> g ∘ u_pq) $= ev_qr₂) =>>= ev_pq₂
+           ; ev₁ = flipEq assoc =>>= ((λ f -> f ∘ u_pq) $= ev_qr₁) =>>= ev_pq₁
+           ; ev₂ = flipEq assoc =>>= ((λ g -> g ∘ u_pq) $= ev_qr₂) =>>= ev_pq₂
            } where
                open PullingBackReduction qr renaming (u to u_qr ; ev₁ to ev_qr₁ ; ev₂ to ev_qr₂)
                open PullingBackReduction pq renaming (u to u_pq ; ev₁ to ev_pq₁ ; ev₂ to ev_pq₂)
 
   identityPullingBackReduction : {C A B : Obj} {f : Hom A C} {g : Hom B C} (pb : PullingBack f g) -> PullingBackReduction pb pb
-  identityPullingBackReduction pb = record { u = id ; ev₁ = right_id _ ; ev₂ = right_id _ }
+  identityPullingBackReduction pb = record { u = id ; ev₁ = right_id ; ev₂ = right_id }
 
   record UniquePullingBackReduction {C A B : Obj} {f : Hom A C} {g : Hom B C} (pb₂ : PullingBack f g) (pb : PullingBack f g) : Set m where
     field
@@ -436,7 +436,7 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
       fe=ge = Equalizer.comm eq
 
       feβ=geβ : f ∘ (e ∘ β) ≡ g ∘ (e ∘ β)
-      feβ=geβ = flipEq (assoc _ _ _) =>>= ((λ h -> h ∘ β) $= fe=ge) =>>= assoc _ _ _
+      feβ=geβ = flipEq assoc =>>= ((λ h -> h ∘ β) $= fe=ge) =>>= assoc
 
       eqβ = equalizing X (e ∘ β) feβ=geβ
 
@@ -484,7 +484,7 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
 
       open Σ (equalizer_uniqueness eq idEq) renaming (proj₁ to red' ; proj₂ to iso_red')
       u_red'=u_red = redUnique red'
-      u_red=e = flipEq (redUnique (record { u = e ; ev = left_id e }))
+      u_red=e = flipEq (redUnique (record { u = e ; ev = left_id }))
       u_red'=e = u_red'=u_red =>>= u_red=e
     in coerce (Iso $= u_red'=e) iso_red'
 
@@ -492,17 +492,17 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
   section_is_equalizer {A} {B} {s} sec =
     let
       open Section sec renaming (retraction to r ; evidence to rs=id)
-    in record { cone = equalizing A s (assoc _ _ _ =>>= ((λ f -> s ∘ f) $= rs=id) =>>= right_id s =>>= flipEq (left_id s))
+    in record { cone = equalizing A s (assoc =>>= ((λ f -> s ∘ f) $= rs=id) =>>= right_id =>>= flipEq left_id)
               ; universal = λ eq₂ →
                 let
                   open Equalizing eq₂ renaming (e to e ; comm to sre=e)
                 in record { reduction = record { u = r ∘ e
-                                               ; ev = flipEq (assoc _ _ _) =>>= sre=e =>>= left_id _
+                                               ; ev = flipEq assoc =>>= sre=e =>>= left_id
                                                }
                           ; unique = λ red₂ →
                             let
                               open EqualizingReduction red₂
-                            in flipEq (left_id _) =>>= ((λ f -> f ∘ u) $= (flipEq rs=id)) =>>= assoc _ _ _ =>>= ((λ f -> r ∘ f) $= ev)
+                            in flipEq left_id =>>= ((λ f -> f ∘ u) $= (flipEq rs=id)) =>>= assoc =>>= ((λ f -> r ∘ f) $= ev)
                           }
               }
 
@@ -515,8 +515,8 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
     in mono λ {X} {α} {β} f'α=f'β ->
       let
         gf'α=gf'β = (λ γ -> g ∘ γ) $= f'α=f'β
-        fg'α=gf'β = flipEq (assoc _ _ _) =>>= ((λ γ -> γ ∘ α) $= fg'=gf') =>>=  assoc _ _ _ =>>= gf'α=gf'β
-        fg'α=fg'β = fg'α=gf'β =>>= flipEq (assoc _ _ _) =>>= flipEq ((λ γ -> γ ∘ β) $= fg'=gf') =>>= assoc _ _ _
+        fg'α=gf'β = flipEq assoc =>>= ((λ γ -> γ ∘ α) $= fg'=gf') =>>=  assoc =>>= gf'α=gf'β
+        fg'α=fg'β = fg'α=gf'β =>>= flipEq assoc =>>= flipEq ((λ γ -> γ ∘ β) $= fg'=gf') =>>= assoc
 
         p2 : PullingBack f g
         p2 = record { P = X ; f' = f' ∘ β ; g' = g' ∘ α ; comm = fg'α=gf'β }
@@ -545,13 +545,13 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
     let
       open Pullback p1 renaming (commuting to cf∘bc=ef∘be ; universal to universal1 ; square to square1)
       open Pullback p2 renaming (commuting to be∘ab=de∘ad ; universal to universal2 ; square to square2)
-    in record { commuting = flipEq (assoc _ _ _) =>>= ((λ f -> f ∘ ab) $= cf∘bc=ef∘be) =>>= (assoc _ _ _) =>>= ((λ f -> ef ∘ f) $= be∘ab=de∘ad) =>>= flipEq (assoc _ _ _)
+    in record { commuting = flipEq assoc =>>= ((λ f -> f ∘ ab) $= cf∘bc=ef∘be) =>>= assoc =>>= ((λ f -> ef ∘ f) $= be∘ab=de∘ad) =>>= flipEq assoc
               ; universal = λ {Q} {qd} {qc} sq →
                   let
                     open CommutingSquare sq renaming (evidence to cf∘qc=ef∘de∘qd)
 
                     sq₁ : CommutingSquare qc cf (de ∘ qd) ef
-                    sq₁ = commutingSquare (cf∘qc=ef∘de∘qd =>>= assoc _ _ _)
+                    sq₁ = commutingSquare (cf∘qc=ef∘de∘qd =>>= assoc)
 
                     sq1_b : UniquePullbackSquareReduction sq₁ square1
                     sq1_b = universal1 sq₁
@@ -566,7 +566,7 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
 
                     open UniquePullbackSquareReduction sq2_a renaming (u to qa ; ev₁ to qb=ab∘qa ; ev₂ to qd=ad∘qa ; unique to unique2)
                   in record { reduction = record { u = qa
-                                                 ; ev₁ = qc=bc∘qb =>>= ((λ f -> bc ∘ f) $= qb=ab∘qa) =>>= flipEq (assoc _ _ _)
+                                                 ; ev₁ = qc=bc∘qb =>>= ((λ f -> bc ∘ f) $= qb=ab∘qa) =>>= flipEq assoc
                                                  ; ev₂ = qd=ad∘qa
                                                  }
                             ; unique = λ red →
@@ -574,8 +574,8 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
                                 open PullbackSquareReduction red renaming (u to qa' ; ev₁ to qc=bc∘ab∘qa' ; ev₂ to qd=ad∘qa')
                                 red₁ : PullbackSquareReduction sq₁ square1
                                 red₁ = record { u = ab ∘ qa'
-                                              ; ev₁ =  qc=bc∘ab∘qa' =>>= assoc _ _ _
-                                              ; ev₂ = ((λ f -> de ∘ f) $= qd=ad∘qa') =>>= flipEq (assoc _ _ _) =>>= ((λ f -> f ∘ qa') $= (flipEq be∘ab=de∘ad)) =>>= assoc _ _ _
+                                              ; ev₁ =  qc=bc∘ab∘qa' =>>= assoc
+                                              ; ev₂ = ((λ f -> de ∘ f) $= qd=ad∘qa') =>>= flipEq assoc =>>= ((λ f -> f ∘ qa') $= (flipEq be∘ab=de∘ad)) =>>= assoc
                                               }
                                 ab∘qa'=qb = unique1 red₁
 
@@ -598,7 +598,7 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
     in record { cone = record { P = P
                               ; f' = π₂ ∘ e
                               ; g' = π₁ ∘ e
-                              ; comm = flipEq (assoc _ _ _) =>>= f∘π₁∘e=g∘π₂∘e =>>= assoc _ _ _
+                              ; comm = flipEq assoc =>>= f∘π₁∘e=g∘π₂∘e =>>= assoc
                               }
               ; universal = λ pb₂ →
                 let
@@ -606,17 +606,17 @@ module Limits {n m : Level} (𝒞 : Category {n} {m}) where
                   open UniqueSpanReduction (prodUniversal (span g' f')) renaming (u to u₀ ; ev₁ to π₁u₀=g' ; ev₂ to π₂u₀=f' ; unique to prodUnique)
 
                   fπ₁u₀=gπ₂u₀ : ((f ∘ π₁) ∘ u₀) ≡ ((g ∘ π₂) ∘ u₀)
-                  fπ₁u₀=gπ₂u₀ = (assoc _ _ _) =>>= ((λ h -> f ∘ h) $= π₁u₀=g') =>>= fg'=gf' =>>= ((λ h -> g ∘ h) $= (flipEq π₂u₀=f')) =>>= (flipEq (assoc _ _ _))
+                  fπ₁u₀=gπ₂u₀ = assoc =>>= ((λ h -> f ∘ h) $= π₁u₀=g') =>>= fg'=gf' =>>= ((λ h -> g ∘ h) $= (flipEq π₂u₀=f')) =>>= (flipEq assoc)
                   open UniqueEqualizingReduction (equUniversal (equalizing P₂ u₀ fπ₁u₀=gπ₂u₀)) renaming (u to u ; ev to eu=u₀ ; unique to equUnique)
                 in record { reduction = record { u = u
-                                               ; ev₁ = assoc _ _ _ =>>= ((λ h -> π₂ ∘ h) $= eu=u₀) =>>= π₂u₀=f'
-                                               ; ev₂ = assoc _ _ _ =>>= ((λ h -> π₁ ∘ h) $= eu=u₀) =>>= π₁u₀=g'
+                                               ; ev₁ = assoc =>>= ((λ h -> π₂ ∘ h) $= eu=u₀) =>>= π₂u₀=f'
+                                               ; ev₂ = assoc =>>= ((λ h -> π₁ ∘ h) $= eu=u₀) =>>= π₁u₀=g'
                                                }
                           ; unique = λ red₂ →
                               let
                                 open PullingBackReduction red₂ renaming (u to u₂ ; ev₁ to π₂eu₂=f' ; ev₂ to π₁eu₂=g')
 
-                                eu₂=u₀ = prodUnique (record { u = e ∘ u₂ ; ev₁ = flipEq (assoc _ _ _) =>>= π₁eu₂=g' ; ev₂ = flipEq (assoc _ _ _) =>>= π₂eu₂=f' })
+                                eu₂=u₀ = prodUnique (record { u = e ∘ u₂ ; ev₁ = flipEq assoc =>>= π₁eu₂=g' ; ev₂ = flipEq assoc =>>= π₂eu₂=f' })
                                 u₂=u = equUnique (record { u = u₂ ; ev =  eu₂=u₀ })
                               in u₂=u
                           }
