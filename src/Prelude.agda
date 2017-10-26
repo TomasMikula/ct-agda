@@ -1,4 +1,4 @@
-open import Agda.Primitive
+open import Agda.Primitive public
 open import Relation.Binary.Core public using (_≡_; refl)
 
  -- Equal functions applied to equal arguments yield equal results.

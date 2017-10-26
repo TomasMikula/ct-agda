@@ -1,6 +1,4 @@
-open import Agda.Primitive
-open import Relation.Binary.Core public using (_≡_)
-open import Prelude using (flipEq)
+open import Prelude
 
 record Category {n m : Level} : Set (lsuc (n ⊔ m)) where
   field
