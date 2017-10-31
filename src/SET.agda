@@ -2,7 +2,7 @@ open import Prelude
 open import category
 
 -- Category of sets and functions
-SET : Category
+SET : Category _ _
 SET = record
         { Obj = Set
         ; Hom = λ A B → (A -> B)

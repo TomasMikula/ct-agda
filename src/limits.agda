@@ -7,18 +7,18 @@ open import functor
 open import nat-trans
 open import pullbacks
 
-module limits {k l : Level} (𝒞 : Category {k} {l}) where
+module limits {k l : Level} (𝒞 : Category k l) where
   open Category using (Obj ; Hom ; HomSet ; id)
   open Category 𝒞 using (_∘_) renaming (id to idC ; left_id to left_idC ; right_id to right_idC ; assoc to assocC)
 
-  record Diagram {nj mj : Level} (J : Category {nj} {mj}) : Set (k ⊔ l ⊔ nj ⊔ mj) where
+  record Diagram {nj mj : Level} (J : Category nj mj) : Set (k ⊔ l ⊔ nj ⊔ mj) where
     constructor diagram
     field
       functor : Functor J 𝒞
 
     identity = Functor.identity functor
       
-  record Cone {nj mj : Level} {J : Category {nj} {mj}} (D : Diagram J) : Set (k ⊔ l ⊔ nj ⊔ mj) where
+  record Cone {nj mj : Level} {J : Category nj mj} (D : Diagram J) : Set (k ⊔ l ⊔ nj ⊔ mj) where
     open Diagram D renaming (functor to F)
     field
       C : Obj 𝒞
@@ -26,25 +26,25 @@ module limits {k l : Level} (𝒞 : Category {k} {l}) where
     τ = NatTrans.τ trans
     naturality = NatTrans.naturality trans
 
-  record ConeReduction {nj mj : Level} {J : Category {nj} {mj}} {D : Diagram J} (c₁ : Cone D) (c₂ : Cone D) : Set (l ⊔ nj) where
+  record ConeReduction {nj mj : Level} {J : Category nj mj} {D : Diagram J} (c₁ : Cone D) (c₂ : Cone D) : Set (l ⊔ nj) where
     open Cone c₁ renaming (C to C₁ ; τ to τ₁)
     open Cone c₂ renaming (C to C₂ ; τ to τ₂)
     field
       u : Hom 𝒞 C₁ C₂
       ev : {A : Obj J} -> τ₁ {A} ≡ τ₂ ∘ u
       
-  record UniqueConeReduction {nj mj : Level} {J : Category {nj} {mj}} {D : Diagram J} (C₁ : Cone D) (C₂ : Cone D) : Set (l ⊔ nj) where
+  record UniqueConeReduction {nj mj : Level} {J : Category nj mj} {D : Diagram J} (C₁ : Cone D) (C₂ : Cone D) : Set (l ⊔ nj) where
     field
       reduction : ConeReduction C₁ C₂
       unique : (r : ConeReduction C₁ C₂) -> ConeReduction.u r ≡ ConeReduction.u reduction
     u = ConeReduction.u reduction
     ev = ConeReduction.ev reduction
       
-  record Limit {nj mj : Level} {J : Category {nj} {mj}} {D : Diagram J} (C : Cone D) : Set (k ⊔ l ⊔ mj ⊔ nj) where
+  record Limit {nj mj : Level} {J : Category nj mj} {D : Diagram J} (C : Cone D) : Set (k ⊔ l ⊔ mj ⊔ nj) where
     field
       universal : (C₂ : Cone D) -> UniqueConeReduction C₂ C
 
-  record LimitOf {nj mj : Level} {J : Category {nj} {mj}} (D : Diagram J) : Set (k ⊔ l ⊔ mj ⊔ nj) where
+  record LimitOf {nj mj : Level} {J : Category nj mj} (D : Diagram J) : Set (k ⊔ l ⊔ mj ⊔ nj) where
     field
       cone : Cone D
       universal : (c : Cone D) -> UniqueConeReduction c cone
@@ -52,7 +52,7 @@ module limits {k l : Level} (𝒞 : Category {k} {l}) where
     τ = Cone.τ cone
 
   -- Discrete category on a set of objects.
-  discrete : {n : Level} -> Set n -> Category {n} {n}
+  discrete : {n : Level} -> Set n -> Category n n
   discrete {n} Obj = record
                        { Obj = Obj
                        ; Hom = λ A B → A ≡ B
@@ -63,10 +63,10 @@ module limits {k l : Level} (𝒞 : Category {k} {l}) where
                        ; assoc = eqUnicity
                        }
 
-  discretize : {k l : Level} -> Category {k} {l} -> Category {k} {k}
+  discretize : {k l : Level} -> Category k l -> Category k k
   discretize C = discrete (Obj C)
 
-  discreteDiagram : {nj mj : Level} {J : Category {nj} {mj}} -> Diagram J -> Diagram (discretize J)
+  discreteDiagram : {nj mj : Level} {J : Category nj mj} -> Diagram J -> Diagram (discretize J)
   discreteDiagram D = diagram (record
                                  { mapObj = DObj
                                  ; mapArr = λ { {A} {.A} refl → idC {DObj A} }
@@ -77,7 +77,7 @@ module limits {k l : Level} (𝒞 : Category {k} {l}) where
                                  open Diagram D renaming (functor to DF)
                                  open Functor DF renaming (mapObj to DObj ; mapArr to DArr ; identity to Did ; composition to Dcomp)
 
-  discreteCone : {nj mj : Level} {J : Category {nj} {mj}} {D : Diagram J} -> Cone D -> Cone (discreteDiagram D)
+  discreteCone : {nj mj : Level} {J : Category nj mj} {D : Diagram J} -> Cone D -> Cone (discreteDiagram D)
   discreteCone {J = J} c = record
     { C = Cone.C c
     ; trans = record
@@ -139,7 +139,7 @@ module limits {k l : Level} (𝒞 : Category {k} {l}) where
     -- and binary pullbacks,
     ({A B C : Obj 𝒞} (f : Hom 𝒞 A C) (g : Hom 𝒞 B C) -> PullbackOf 𝒞 f g) ->
     -- for any diagram
-    {nj mj : Level} {J : Category {nj} {mj}} -> (D : Diagram J) ->
+    {nj mj : Level} {J : Category nj mj} -> (D : Diagram J) ->
     -- with at least two objects
     (c₁ c₂ : Obj J) -> c₂ ≢ c₁ ->
     -- and decidable equality of objects,

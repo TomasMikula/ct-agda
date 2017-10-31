@@ -3,7 +3,7 @@ open import Prelude
 open import category
 
 -- Some special morphisms.
-module morphisms {n m : Level} (𝒞 : Category {n} {m}) where
+module morphisms {n m : Level} (𝒞 : Category n m) where
   open Category 𝒞
   
   record Mono {A B : Obj} (f : Hom A B) : Set (m ⊔ n) where

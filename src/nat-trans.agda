@@ -2,7 +2,7 @@ open import Prelude
 open import category
 open import functor
 
-record NatTrans {nc mc nd md : Level} {C : Category {nc} {mc}} {D : Category {nd} {md}}  (F G : Functor C D) : Set (nc ⊔ mc ⊔ nd ⊔ md) where
+record NatTrans {nc mc nd md : Level} {C : Category nc mc} {D : Category nd md}  (F G : Functor C D) : Set (nc ⊔ mc ⊔ nd ⊔ md) where
   open Category hiding (_∘_)
   open Category D using (_∘_)
   open Functor F renaming (mapObj to Fobj ; mapArr to Farr)

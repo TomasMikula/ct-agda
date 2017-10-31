@@ -4,7 +4,7 @@ open import Prelude
 open import category
 import morphisms
 
-module pullbacks {n m : Level} (𝒞 : Category {n} {m}) where
+module pullbacks {n m : Level} (𝒞 : Category n m) where
   open Category 𝒞
   open morphisms 𝒞
 
