@@ -41,6 +41,10 @@ module pullbacks {n m : Level} (𝒞 : Category {n} {m}) where
     field
       reduction : PullingBackReduction pb₂ pb
       unique : (red₂ : PullingBackReduction pb₂ pb) -> PullingBackReduction.u red₂ ≡ PullingBackReduction.u reduction
+      
+    u = PullingBackReduction.u reduction
+    ev₁ = PullingBackReduction.ev₁ reduction
+    ev₂ = PullingBackReduction.ev₁ reduction
 
   --
   --      f₁

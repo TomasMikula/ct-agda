@@ -1,4 +1,5 @@
 open import Prelude
+open import Data.Product
 
 record Category {n m : Level} : Set (lsuc (n ⊔ m)) where
   field
@@ -14,6 +15,8 @@ record Category {n m : Level} : Set (lsuc (n ⊔ m)) where
 
   _>>_ : {A B C : Obj} -> (Hom A B) -> (Hom B C) -> (Hom A C)
   f >> g  = g ∘ f
+
+  HomSet = Σ Obj (λ A -> Σ Obj (λ B -> Hom A B))
 
 op : {n m : Level} -> Category {n} {m} -> Category {n} {m}
 op 𝒞 = record
