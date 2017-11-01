@@ -3,30 +3,30 @@ open import Prelude
 open import category
 
 -- Some special morphisms.
-module morphisms {n m : Level} (𝒞 : Category n m) where
+module morphisms {k l : Level} (𝒞 : Category k l) where
   open Category 𝒞
   
-  record Mono {A B : Obj} (f : Hom A B) : Set (m ⊔ n) where
+  record Mono {A B : Obj} (f : Hom A B) : Set (k ⊔ l) where
     constructor mono
     field
       elimL : { X : Obj } {g h : Hom X A} -> ((f ∘ g) ≡ (f ∘ h)) -> (g ≡ h)
 
-  record Epi {A B : Obj} (f : Hom A B) : Set (m ⊔ n) where
+  record Epi {A B : Obj} (f : Hom A B) : Set (l ⊔ k) where
     constructor epi
     field
       elimR : { X : Obj } {g h : Hom B X} -> ((g ∘ f) ≡ (h ∘ f)) -> (g ≡ h)
     
-  record Section {A B : Obj} (s : Hom A B) : Set m where
+  record Section {A B : Obj} (s : Hom A B) : Set l where
     field
       retraction : Hom B A
       evidence : (retraction ∘ s) ≡ id
 
-  record Retraction {A B : Obj} (r : Hom A B) : Set m where
+  record Retraction {A B : Obj} (r : Hom A B) : Set l where
     field
       section : Hom B A
       evidence : (r ∘ section) ≡ id
 
-  record Iso {A B : Obj} (f : Hom A B) : Set m where
+  record Iso {A B : Obj} (f : Hom A B) : Set l where
     field
       inverse : Hom B A
       leftInverse  : (inverse ∘ f) ≡ id

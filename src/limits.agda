@@ -11,7 +11,7 @@ open import pullbacks
 
 module limits {k l : Level} (𝒞 : Category k l) where
   open Category using (Obj ; Hom ; HomSet ; id)
-  open Category 𝒞 using (_∘_) renaming (id to idC ; left_id to left_idC ; right_id to right_idC ; assoc to assocC)
+  open Category 𝒞 using (_∘_ ; assocLR ; assocRL) renaming (id to idC ; left_id to l-id ; right_id to r-id)
 
   record Diagram {nj mj : Level} (J : Category nj mj) : Set (k ⊔ l ⊔ nj ⊔ mj) where
     constructor diagram
@@ -73,7 +73,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
                                  { mapObj = DObj
                                  ; mapArr = λ { {A} {.A} refl → idC {DObj A} }
                                  ; identity = refl
-                                 ; composition = λ {A B C} -> λ { {g = refl} {refl} → flipEq left_idC }
+                                 ; composition = λ {A B C} -> λ { {g = refl} {refl} → flipEq l-id }
                                  })
                                where
                                  open Diagram D renaming (functor to DF)
@@ -84,7 +84,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     { C = Cone.C c
     ; trans = record
         { τ = λ {A} → Cone.τ c {A}
-        ; naturality = λ { refl -> right_idC =>>= flipEq (left_idC)}
+        ; naturality = λ { refl -> r-id =>>= flipEq (l-id)}
         }
     }
                                  
@@ -92,7 +92,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   powerDiagram A X = diagram (ConstFunctor {𝒞₁ = discrete X} A)
 
   Δ-cone : {A : Obj 𝒞} {n : Level} {X : Set n} -> Cone (powerDiagram A X)
-  Δ-cone {A} {n} {X} = record { C = A ; trans = record { τ = idC ; naturality = λ f -> left_idC =>>= flipEq right_idC } }
+  Δ-cone {A} {n} {X} = record { C = A ; trans = record { τ = idC ; naturality = λ f -> l-id =>>= flipEq r-id } }
   
   Δ : {A : Obj 𝒞} {n : Level} {X : Set n} -> (L : LimitOf (powerDiagram A X)) -> Hom 𝒞 A (LimitOf.C L)
   Δ {A} {n} {X} L = UniqueConeReduction.u (LimitOf.universal L Δ-cone)
@@ -110,9 +110,9 @@ module limits {k l : Level} (𝒞 : Category k l) where
       pₓ = p {x}
       pₓΔ=id : (pₓ ∘ (Δ L)) ≡ idC
       pₓΔ=id = pᵢΔ=id {L = L}
-      pₓΔg=pₓΔh = assocC =>>= ((pₓ ∘_) $= Δg=Δh) =>>= flipEq assocC
+      pₓΔg=pₓΔh = assocLR =>>= ((pₓ ∘_) $= Δg=Δh) =>>= assocRL
       id∘g=id∘h = ((_∘ g) $= (flipEq pₓΔ=id)) =>>= pₓΔg=pₓΔh =>>= ((_∘ h) $= pₓΔ=id)
-    in (flipEq left_idC) =>>= id∘g=id∘h =>>= left_idC
+    in (flipEq l-id) =>>= id∘g=id∘h =>>= l-id
 
   equal-under-projections : {A : Obj 𝒞} {n : Level} {X : Set n} {D : Diagram (discrete X)} (L : LimitOf D) {f g : Hom 𝒞 A (LimitOf.C L)} ->
                             ((x : X) -> (LimitOf.τ L {x}) ∘ f ≡ (LimitOf.τ L {x}) ∘ g) -> f ≡ g
@@ -123,7 +123,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
       fCone : Cone D
       fCone = record { C = A ; trans = record
                                  { τ = p ∘ f
-                                 ; naturality = λ { refl → right_idC =>>= (flipEq left_idC) =>>= ((_∘ (p ∘ f)) $= flipEq Did)} }
+                                 ; naturality = λ { refl → r-id =>>= (flipEq l-id) =>>= ((_∘ (p ∘ f)) $= flipEq Did)} }
                                  }
       fRed : ConeReduction fCone Lcone
       fRed = record { u = f ; ev = refl }
@@ -139,8 +139,8 @@ module limits {k l : Level} (𝒞 : Category k l) where
     { mapObj = λ { (inl .A) → A ; (inr .B) → B }
     ; mapArr = λ { {inl _} refl → idC ; {inr _} refl → idC}
     ; identity = λ { {inl _} → refl ; {inr _} → refl}
-    ; composition = λ { {inl _} {g = refl} {refl} → flipEq left_idC
-                      ; {inr _} {g = refl} {refl} → flipEq left_idC
+    ; composition = λ { {inl _} {g = refl} {refl} → flipEq l-id
+                      ; {inr _} {g = refl} {refl} → flipEq l-id
                       }
     })
 
@@ -163,8 +163,8 @@ module limits {k l : Level} (𝒞 : Category k l) where
           { C = X
           ; trans = record
             { τ = λ { {inl _} → Span.f₁ s ; {inr _} → Span.f₂ s }
-            ; naturality = λ { {inl _} refl → right_idC =>>= flipEq left_idC
-                             ; {inr _} refl → right_idC =>>= flipEq left_idC
+            ; naturality = λ { {inl _} refl → r-id =>>= flipEq l-id
+                             ; {inr _} refl → r-id =>>= flipEq l-id
                              }
             }
           }
@@ -234,7 +234,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
       { C = P
       ; trans = record
           { τ = pqm α _
-          ; naturality = λ { refl → right_idC =>>= (flipEq left_idC)}
+          ; naturality = λ { refl → r-id =>>= (flipEq l-id)}
           }
       }
 
@@ -243,7 +243,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
       { C = P
       ; trans = record
           { τ = λ { {(a , c , α)} → UniqueConeReduction.u (Puniversal (Dspan α)) }
-          ; naturality = λ { refl → right_idC =>>= flipEq left_idC }
+          ; naturality = λ { refl → r-id =>>= flipEq l-id }
           }
       }
 
@@ -256,7 +256,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
         pqmαb=pb∘qmα : pqm α b ≡ p b ∘ qmα
         pqmαb=pb∘qmα = pqmα=p∘qmα {b}
         pb∘qmα=pb∘qα∘m : p b ∘ qmα ≡ (p b ∘ q α) ∘ m
-        pb∘qmα=pb∘qα∘m = ((p b ∘_) $= qm=q∘m {a , c , α}) =>>= (flipEq assocC)
+        pb∘qmα=pb∘qα∘m = ((p b ∘_) $= qm=q∘m {a , c , α}) =>>= assocRL
 
     pqm=Dp : {b a : Obj J} (α : Hom J a b) -> (p b ∘ q α) ∘ m ≡ DArr α ∘ p a
     pqm=Dp {b} {a} α = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=Dα∘pa
@@ -299,9 +299,9 @@ module limits {k l : Level} (𝒞 : Category k l) where
       let
         pb=pbqαm : p b ≡ (p b ∘ q α) ∘ m
         pb=pbqαm = flipEq (pqm=p α c≠b)
-        pbΔ'=pbqαmΔ' = ((_∘ Δ') $= pb=pbqαm) =>>= assocC
-        pbΔ'=pbqαΔm' = pbΔ'=pbqαmΔ' =>>= (((p b ∘ q α) ∘_) $= (flipEq Δm'=mΔ')) =>>= assocC
-        qαΔm'=m' = flipEq assocC =>>= ((_∘ m') $= qΔ=id) =>>= left_idC
+        pbΔ'=pbqαmΔ' = ((_∘ Δ') $= pb=pbqαm) =>>= assocLR
+        pbΔ'=pbqαΔm' = pbΔ'=pbqαmΔ' =>>= (((p b ∘ q α) ∘_) $= (flipEq Δm'=mΔ')) =>>= assocLR
+        qαΔm'=m' = assocRL =>>= ((_∘ m') $= qΔ=id) =>>= l-id
         pbΔ'=pbm' = pbΔ'=pbqαΔm' =>>= (((p b) ∘_) $= qαΔm'=m')
       in flipEq pbΔ'=pbm'
     
@@ -315,13 +315,13 @@ module limits {k l : Level} (𝒞 : Category k l) where
     Dg=g {a} {b} α = Dαga=DαpaΔ' =>>= DαpaΔ'=pbqαmΔ' =>>= pbqαmΔ'=pbqαΔm' =>>= pbqαΔm'=pbm' =>>= pbm'=gb
       where
         Dαga=DαpaΔ'     : (DArr α) ∘ g a ≡ (DArr α ∘ p a) ∘ Δ'
-        Dαga=DαpaΔ'     = flipEq assocC
+        Dαga=DαpaΔ'     = assocRL
         DαpaΔ'=pbqαmΔ'  : (DArr α ∘ p a) ∘ Δ' ≡ (p b ∘ q α) ∘ (m ∘ Δ')
-        DαpaΔ'=pbqαmΔ'  = (_∘ Δ') $= flipEq (pqm=Dp α) =>>= assocC
+        DαpaΔ'=pbqαmΔ'  = (_∘ Δ') $= flipEq (pqm=Dp α) =>>= assocLR
         pbqαmΔ'=pbqαΔm' : (p b ∘ q α) ∘ (m ∘ Δ') ≡ p b ∘ (q α ∘ (ΔP ∘ m'))
-        pbqαmΔ'=pbqαΔm' = ((p b ∘ q α) ∘_) $= flipEq Δm'=mΔ' =>>= assocC
+        pbqαmΔ'=pbqαΔm' = ((p b ∘ q α) ∘_) $= flipEq Δm'=mΔ' =>>= assocLR
         pbqαΔm'=pbm'    : p b ∘ (q α ∘ (ΔP ∘ m')) ≡ p b ∘ m'
-        pbqαΔm'=pbm'    = ((p b ∘_) $= (flipEq assocC =>>= ((_∘ m') $= qΔ=id) =>>= left_idC))
+        pbqαΔm'=pbm'    = ((p b ∘_) $= (assocRL =>>= ((_∘ m') $= qΔ=id) =>>= l-id))
         pbm'=gb         : p b ∘ m' ≡ g b
         pbm'=gb         = pm'=pΔ' b
     
@@ -330,7 +330,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
       { C = L
       ; trans = record
           { τ = λ {a} → g a
-          ; naturality = λ α → right_idC =>>= flipEq (Dg=g α)
+          ; naturality = λ α → r-id =>>= flipEq (Dg=g α)
           }
       }
 
@@ -344,15 +344,19 @@ module limits {k l : Level} (𝒞 : Category k l) where
         Δf'=mf' = equal-under-q-p pqΔf'=pqmf'
           where
             pqΔf'=f : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> (p b ∘ q α) ∘ (ΔP ∘ f') ≡ f {b}
-            pqΔf'=f α b = assocC =>>= ((p b ∘_) $= (flipEq assocC =>>= ((_∘ f') $= qΔ=id =>>= left_idC)) =>>= (flipEq f=pf'))
+            pqΔf'=f α b = assocLR =>>= ((p b ∘_) $= (assocRL =>>= ((_∘ f') $= qΔ=id =>>= l-id)) =>>= (flipEq f=pf'))
             
             pqmf'=f : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> (p b ∘ q α) ∘ (m ∘ f') ≡ f {b}
             pqmf'=f {a} {c} α b with cmp c b
-            ...                    | inj₁ refl = flipEq assocC =>>= ((_∘ f') $= (pqm=Dp α)) =>>= assocC =>>= ((DArr α ∘_) $= flipEq f=pf') =>>= (flipEq (f=Df α) =>>= right_idC)
-            ...                    | inj₂ c≠b  = flipEq assocC =>>= ((_∘ f') $= (pqm=p α c≠b)) =>>= flipEq f=pf'
+            ...                    | inj₁ refl = pbqαmf'=Dαpaf' =>>= Dαpaf'=Dαfa =>>= Dαfa=fb
+                                       where
+                                         pbqαmf'=Dαpaf' = assocRL =>>= ((_∘ f') $= (pqm=Dp α))
+                                         Dαpaf'=Dαfa = assocLR =>>= ((DArr α ∘_) $= flipEq f=pf')
+                                         Dαfa=fb = flipEq (f=Df α) =>>= r-id
+            ...                    | inj₂ c≠b  = assocRL =>>= ((_∘ f') $= (pqm=p α c≠b)) =>>= flipEq f=pf'
             
             pqΔf'=pqmf' : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> p b ∘ (q α ∘ (ΔP ∘ f')) ≡ p b ∘ (q α ∘ (m ∘ f'))
-            pqΔf'=pqmf' {a} {c} α b = flipEq assocC =>>= (pqΔf'=f α b) =>>= flipEq (pqmf'=f α b) =>>= assocC
+            pqΔf'=pqmf' {a} {c} α b = assocRL =>>= (pqΔf'=f α b) =>>= flipEq (pqmf'=f α b) =>>= assocLR
 
         f'Cone : PullingBack 𝒞 ΔP m
         f'Cone = record { P = X ; f' = f' ; g' = f' ; comm = Δf'=mf' }
@@ -363,7 +367,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
         f=pΔ'h {a} = f=pf' =>>= ((p a ∘_) $= flipEq Δ'h=f')
 
         f=gh : {a : Obj J} -> f {a} ≡ g a ∘ h
-        f=gh {a} = f=pΔ'h {a} =>>= (flipEq assocC)
+        f=gh {a} = f=pΔ'h {a} =>>= assocRL
         
         f-to-g : ConeReduction fCone gCone
         f-to-g = record { u = h ; ev = f=gh }
@@ -373,7 +377,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
           where
             open ConeReduction h'red renaming (u to h' ; ev to f=gh')
             Δ'h'red : ConeReduction (discreteCone fCone) Pcone
-            Δ'h'red = record { u =  Δ' ∘ h' ; ev = λ {a} -> f=gh' {a} =>>= assocC }
+            Δ'h'red = record { u =  Δ' ∘ h' ; ev = f=gh' =>>= assocLR }
             
             Δ'h'=f' : Δ' ∘ h' ≡ f'
             Δ'h'=f' = f'unique Δ'h'red

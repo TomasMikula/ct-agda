@@ -13,10 +13,14 @@ record Category (n m : Level) : Set (lsuc (n ⊔ m)) where
     right_id : {A B : Obj} {f : Hom A B} -> (f ∘ id ≡ f)
     assoc : {A B C D : Obj} {f : Hom C D} {g : Hom B C} {h : Hom A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
 
+  HomSet = Σ Obj (λ A -> Σ Obj (λ B -> Hom A B))
+
   _>>_ : {A B C : Obj} -> (Hom A B) -> (Hom B C) -> (Hom A C)
   f >> g  = g ∘ f
 
-  HomSet = Σ Obj (λ A -> Σ Obj (λ B -> Hom A B))
+  assocLR = assoc
+  assocRL : {A B C D : Obj} {f : Hom C D} {g : Hom B C} {h : Hom A B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
+  assocRL = flipEq assoc
 
 op : {n m : Level} -> Category n m -> Category n m
 op 𝒞 = record
