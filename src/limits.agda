@@ -3,8 +3,10 @@ open import Data.Product
 open import Data.Sum
 open import Prelude
 open import category
+open import equalizers
 open import functor
 open import nat-trans
+open import products
 open import pullbacks
 
 module limits {k l : Level} (𝒞 : Category k l) where
@@ -131,7 +133,50 @@ module limits {k l : Level} (𝒞 : Category k l) where
       f=u = unique fRed
       g=u = unique gRed
     in f=u =>>= flipEq g=u
-  
+
+  binaryProductDiagram : (A B : Obj 𝒞) -> Diagram (discrete (Doubleton A B))
+  binaryProductDiagram A B = diagram (record
+    { mapObj = λ { (inl .A) → A ; (inr .B) → B }
+    ; mapArr = λ { {inl _} refl → idC ; {inr _} refl → idC}
+    ; identity = λ { {inl _} → refl ; {inr _} → refl}
+    ; composition = λ { {inl _} {g = refl} {refl} → flipEq left_idC
+                      ; {inr _} {g = refl} {refl} → flipEq left_idC
+                      }
+    })
+
+  binaryProductFromLimit : {A B : Obj 𝒞} -> LimitOf (binaryProductDiagram A B) -> Product 𝒞 A B
+  binaryProductFromLimit {A} {B} L = record { P = P ; cone = Pspan ; universal = universality } where
+    open LimitOf L renaming (C to P ; τ to p)
+    Pspan = span (p {inl A}) (p {inr B})
+    universality : {X : Obj 𝒞} (s : Span 𝒞 X A B) → UniqueSpanReduction 𝒞 s Pspan
+    universality {X} s = record
+      { reduction = record
+          { u = u
+          ; ev₁ = flipEq ev
+          ; ev₂ = flipEq ev
+          }
+      ; unique = sUnique
+      }
+      where
+        sCone : Cone (binaryProductDiagram A B)
+        sCone = record
+          { C = X
+          ; trans = record
+            { τ = λ { {inl _} → Span.f₁ s ; {inr _} → Span.f₂ s }
+            ; naturality = λ { {inl _} refl → right_idC =>>= flipEq left_idC
+                             ; {inr _} refl → right_idC =>>= flipEq left_idC
+                             }
+            }
+          }
+        open UniqueConeReduction (universal sCone)
+        sUnique : (red₂ : SpanReduction 𝒞 s Pspan) → SpanReduction.u red₂ ≡ u
+        sUnique red₂ = unique (record
+          { u = SpanReduction.u red₂
+          ; ev = λ { {inl _} → flipEq (SpanReduction.ev₁ red₂)
+                   ; {inr _} → flipEq (SpanReduction.ev₂ red₂)
+                   }
+          })
+
   -- Freyd theorem
   limits-from-products-and-pullbacks :
     -- Given arbitrary products
@@ -335,3 +380,25 @@ module limits {k l : Level} (𝒞 : Category k l) where
 
             Δ'h'=Δ'h = Δ'h'=f' =>>= flipEq Δ'h=f'
             h'=h = Mono.elimL mono-Δ' Δ'h'=Δ'h
+
+  -- Maranda theorem
+  limits-from-products-and-equalizers :
+    -- Given arbitrary products
+    ({l : Level} {X : Set l} (D : Diagram (discrete X)) -> LimitOf D) ->
+    -- and binary equalizers,
+    ({A B : Obj 𝒞} (f g : Hom 𝒞 A B) -> Equalizer 𝒞 f g) ->
+    -- for any diagram
+    {nj mj : Level} {J : Category nj mj} -> (D : Diagram J) ->
+    -- with at least two objects
+    (c₁ c₂ : Obj J) -> c₂ ≢ c₁ ->
+    -- and decidable equality of objects,
+    ((A B : Obj J) -> A ≡ B ⊎ A ≢ B) ->
+    -- we have a limit.
+    LimitOf D
+  limits-from-products-and-equalizers prod equ {J = J} D c₁ c₂ c₂≠c₁ cmp =
+    limits-from-products-and-pullbacks prod pb D c₁ c₂ c₂≠c₁ cmp
+   where
+     pb : {A B C : Obj 𝒞} (f : Hom 𝒞 A C) (g : Hom 𝒞 B C) -> PullbackOf 𝒞 f g
+     pb f g = pullback_construction 𝒞 binProd equ f g where
+       binProd : (A B : Obj 𝒞) -> Product 𝒞 A B
+       binProd A B = binaryProductFromLimit (prod (binaryProductDiagram A B))

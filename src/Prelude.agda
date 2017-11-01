@@ -26,3 +26,10 @@ coerce refl a = a
 
 eqUnicity : {n : Level} {A : Set n} {a b : A} {p q : a ≡ b} -> p ≡ q
 eqUnicity {p = refl} {q = refl} = refl
+
+data Singleton {ℓ : _} {A : Set ℓ} : A -> Set where
+  just : (a : A) -> Singleton a
+
+data Doubleton {ℓ : _} {A : Set ℓ} : A -> A -> Set where
+  inl : (a : A) {b : A} -> Doubleton a b
+  inr : {a : A} (b : A) -> Doubleton a b
