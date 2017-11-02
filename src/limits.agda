@@ -390,7 +390,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     -- Given arbitrary products
     ({l : Level} {X : Set l} (D : Diagram (discrete X)) -> LimitOf D) ->
     -- and binary equalizers,
-    ({A B : Obj 𝒞} (f g : Hom 𝒞 A B) -> Equalizer 𝒞 f g) ->
+    ({A B : Obj 𝒞} (f g : Hom 𝒞 A B) -> EqualizerOf 𝒞 f g) ->
     -- for any diagram
     {nj mj : Level} {J : Category nj mj} -> (D : Diagram J) ->
     -- with at least two objects

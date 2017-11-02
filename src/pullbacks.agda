@@ -57,8 +57,11 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
                               (sq : CommutingSquare g' f f' g) -> PullbackSquareReduction sq sq
   identityPullbackSquareReduction sq = record { u = id ; ev₁ = flipEq right_id ; ev₂ = flipEq right_id }
 
-  record UniquePullbackSquareReduction {P₁ P₂ A B C : Obj}{f : Hom A C}{g : Hom B C}{f₂ : Hom P₂ B}{g₂ : Hom P₂ A}{f₁ : Hom P₁ B}{g₁ : Hom P₁ A}
-                                       (sq₂ : CommutingSquare g₂ f f₂ g) (sq₁ : CommutingSquare g₁ f f₁ g) : Set m where
+  record UniquePullbackSquareReduction
+    {A B C : Obj}{f : Hom A C}{g : Hom B C}
+    {P₂ : Obj }{f₂ : Hom P₂ B}{g₂ : Hom P₂ A}{P₁ : Obj}{f₁ : Hom P₁ B}{g₁ : Hom P₁ A}
+    (sq₂ : CommutingSquare g₂ f f₂ g) (sq₁ : CommutingSquare g₁ f f₁ g) : Set m
+   where
     field
       reduction : PullbackSquareReduction sq₂ sq₁
       unique : (red : PullbackSquareReduction sq₂ sq₁) -> PullbackSquareReduction.u red ≡ PullbackSquareReduction.u reduction
@@ -207,12 +210,12 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
 
   -- Construction of pullbacks from products and equalizers
   pullback_construction : ((A B : Obj) -> Product A B) ->
-                          ({A B : Obj} -> (f g : Hom A B) -> Equalizer f g) ->
+                          ({A B : Obj} -> (f g : Hom A B) -> EqualizerOf f g) ->
                           {A₁ A₂ C : Obj} -> (f : Hom A₁ C) -> (g : Hom A₂ C) -> PullbackOf f g
   pullback_construction prod equ {A₁} {A₂} {C} f g =
     let
       open Product (prod A₁ A₂) renaming (P to A₁xA₂ ; universal to prodUniversal)
-      open Equalizer (equ (f ∘ π₁) (g ∘ π₂)) renaming (E to P ; comm to f∘π₁∘e=g∘π₂∘e ; universal to equUniversal)
+      open EqualizerOf (equ (f ∘ π₁) (g ∘ π₂)) renaming (E to P ; evidence to f∘π₁∘e=g∘π₂∘e ; universal to equUniversal)
     in record
        { P = P
        ; f' = π₂ ∘ e
@@ -225,7 +228,7 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
 
                fπ₁u₀=gπ₂u₀ : ((f ∘ π₁) ∘ u₀) ≡ ((g ∘ π₂) ∘ u₀)
                fπ₁u₀=gπ₂u₀ = assocLR =>>= ((f ∘_) $= π₁u₀=g') =>>= fg'=gf' =>>= ((g ∘_) $= (flipEq π₂u₀=f')) =>>= assocRL
-               open UniqueEqualizingReduction (equUniversal (equalizing P₂ u₀ fπ₁u₀=gπ₂u₀)) renaming (u to u ; ev to eu=u₀ ; unique to equUnique)
+               open UniqueEqualizingReduction (equUniversal (equalizing fπ₁u₀=gπ₂u₀)) renaming (u to u ; ev to eu=u₀ ; unique to equUnique)
              in record
                { reduction = record
                  { u = u
