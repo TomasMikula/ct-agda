@@ -282,7 +282,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     qΔ=id : {a c : Obj J} {α : Hom J a c} -> q α ∘ ΔP ≡ idC
     qΔ=id = pᵢΔ=id {L = Pᴹ'}
     
-    open PullbackOf (pb ΔP m) renaming (P to L ; f' to Δ' ; g' to m' ; comm to Δm'=mΔ' ; universal to Luniversal)
+    open PullbackOf (pb ΔP m) renaming (P to L ; f' to Δ' ; g' to m' ; commuting to Δm'=mΔ' ; universal to Luniversal)
 
     mono-Δ' : Mono Δ'
     mono-Δ' = pullback_of_mono_is_mono 𝒞 (pb ΔP m) mono-ΔP
@@ -358,13 +358,13 @@ module limits {k l : Level} (𝒞 : Category k l) where
             pqΔf'=pqmf' : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> p b ∘ (q α ∘ (ΔP ∘ f')) ≡ p b ∘ (q α ∘ (m ∘ f'))
             pqΔf'=pqmf' {a} {c} α b = assocRL =>>= (pqΔf'=f α b) =>>= flipEq (pqmf'=f α b) =>>= assocLR
 
-        f'Cone : PullingBack 𝒞 ΔP m
-        f'Cone = record { P = X ; f' = f' ; g' = f' ; comm = Δf'=mf' }
+        f'Cone : CommutingSquare 𝒞 f' ΔP f' m
+        f'Cone = commutingSquare Δf'=mf'
 
-        open UniquePullingBackReduction (Luniversal f'Cone) renaming (u to h ; ev₂ to Δ'h=f')
+        open UniquePullbackSquareReduction (Luniversal f'Cone) renaming (u to h ; ev₂ to f'=Δ'h)
 
         f=pΔ'h : {a : Obj J} -> f {a} ≡ p a ∘ (Δ' ∘ h)
-        f=pΔ'h {a} = f=pf' =>>= ((p a ∘_) $= flipEq Δ'h=f')
+        f=pΔ'h {a} = f=pf' =>>= ((p a ∘_) $= f'=Δ'h)
 
         f=gh : {a : Obj J} -> f {a} ≡ g a ∘ h
         f=gh {a} = f=pΔ'h {a} =>>= assocRL
@@ -382,7 +382,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
             Δ'h'=f' : Δ' ∘ h' ≡ f'
             Δ'h'=f' = f'unique Δ'h'red
 
-            Δ'h'=Δ'h = Δ'h'=f' =>>= flipEq Δ'h=f'
+            Δ'h'=Δ'h = Δ'h'=f' =>>= f'=Δ'h
             h'=h = Mono.elimL mono-Δ' Δ'h'=Δ'h
 
   -- Maranda theorem

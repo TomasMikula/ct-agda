@@ -8,44 +8,6 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   open Category 𝒞
   open morphisms 𝒞
 
-  record PullingBack {C A B : Obj} (f : Hom A C) (g : Hom B C) : Set (n ⊔ m) where
-    field
-      P : Obj
-      f' : Hom P B
-      g' : Hom P A
-      comm : f ∘ g' ≡ g ∘ f'
-
-  record PullingBackReduction {C A B : Obj} {f : Hom A C} {g : Hom B C} (pb₂ : PullingBack f g) (pb : PullingBack f g) : Set m where
-    open PullingBack pb
-    open PullingBack pb₂ renaming (P to P₂ ; f' to f₂' ; g' to g₂')
-    field
-      u : Hom P₂ P
-      ev₁ : f' ∘ u ≡ f₂'
-      ev₂ : g' ∘ u ≡ g₂'
-
-  composePullingBackReductions : {C A B : Obj} {f : Hom A C} {g : Hom B C} {p q r : PullingBack f g} -> PullingBackReduction q r -> PullingBackReduction p q -> PullingBackReduction p r
-  composePullingBackReductions qr pq =
-    record
-      { u = u_qr ∘ u_pq
-      ; ev₁ = flipEq assoc =>>= ((_∘ u_pq) $= ev_qr₁) =>>= ev_pq₁
-      ; ev₂ = flipEq assoc =>>= ((_∘ u_pq) $= ev_qr₂) =>>= ev_pq₂
-      }
-    where
-      open PullingBackReduction qr renaming (u to u_qr ; ev₁ to ev_qr₁ ; ev₂ to ev_qr₂)
-      open PullingBackReduction pq renaming (u to u_pq ; ev₁ to ev_pq₁ ; ev₂ to ev_pq₂)
-
-  identityPullingBackReduction : {C A B : Obj} {f : Hom A C} {g : Hom B C} (pb : PullingBack f g) -> PullingBackReduction pb pb
-  identityPullingBackReduction pb = record { u = id ; ev₁ = right_id ; ev₂ = right_id }
-
-  record UniquePullingBackReduction {C A B : Obj} {f : Hom A C} {g : Hom B C} (pb₂ : PullingBack f g) (pb : PullingBack f g) : Set m where
-    field
-      reduction : PullingBackReduction pb₂ pb
-      unique : (red₂ : PullingBackReduction pb₂ pb) -> PullingBackReduction.u red₂ ≡ PullingBackReduction.u reduction
-      
-    u = PullingBackReduction.u reduction
-    ev₁ = PullingBackReduction.ev₁ reduction
-    ev₂ = PullingBackReduction.ev₁ reduction
-
   --
   --      f₁
   --    A -> B
@@ -67,12 +29,33 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   --   |   v    v
   --   ╰-> B -> C
   --         g
-  record PullbackSquareReduction {P₁ P₂ A B C : Obj}{f : Hom A C}{g : Hom B C}{f₂ : Hom P₂ B}{g₂ : Hom P₂ A}{f₁ : Hom P₁ B}{g₁ : Hom P₁ A}
+  record PullbackSquareReduction {P₁ P₂ A B C : Obj}{f : Hom A C}{g : Hom B C}
+                                 {f₂ : Hom P₂ B} {g₂ : Hom P₂ A}   {f₁ : Hom P₁ B} {g₁ : Hom P₁ A}
                                  (sq₂ : CommutingSquare g₂ f f₂ g) (sq₁ : CommutingSquare g₁ f f₁ g) : Set m where
     field
       u : Hom P₂ P₁
       ev₁ : g₂ ≡ g₁ ∘ u
       ev₂ : f₂ ≡ f₁ ∘ u
+
+  composePullbackSquareReductions : {P₁ P₂ P₃ A B C : Obj} {f : Hom A C} {g : Hom B C}
+                                    {f₁ : Hom P₁ B} {g₁ : Hom P₁ A} {sq₁ : CommutingSquare g₁ f f₁ g}
+                                    {f₂ : Hom P₂ B} {g₂ : Hom P₂ A} {sq₂ : CommutingSquare g₂ f f₂ g}
+                                    {f₃ : Hom P₃ B} {g₃ : Hom P₃ A} {sq₃ : CommutingSquare g₃ f f₃ g} ->
+                                    PullbackSquareReduction sq₂ sq₃ -> PullbackSquareReduction sq₁ sq₂ ->
+                                    PullbackSquareReduction sq₁ sq₃
+  composePullbackSquareReductions r23 r12 =
+    record
+      { u = u₂₃ ∘ u₁₂
+      ; ev₁ = g₁=g₂u₁₂ =>>= ((_∘ u₁₂) $= g₂=g₃u₂₃) =>>= assoc
+      ; ev₂ = f₁=f₂u₁₂ =>>= ((_∘ u₁₂) $= f₂=f₃u₂₃) =>>= assoc
+      }
+    where
+      open PullbackSquareReduction r23 renaming (u to u₂₃ ; ev₁ to g₂=g₃u₂₃ ; ev₂ to f₂=f₃u₂₃)
+      open PullbackSquareReduction r12 renaming (u to u₁₂ ; ev₁ to g₁=g₂u₁₂ ; ev₂ to f₁=f₂u₁₂)
+
+  identityPullbackSquareReduction : {P A B C : Obj} {f : Hom A C} {g : Hom B C} {f' : Hom P B} {g' : Hom P A}
+                              (sq : CommutingSquare g' f f' g) -> PullbackSquareReduction sq sq
+  identityPullbackSquareReduction sq = record { u = id ; ev₁ = flipEq right_id ; ev₂ = flipEq right_id }
 
   record UniquePullbackSquareReduction {P₁ P₂ A B C : Obj}{f : Hom A C}{g : Hom B C}{f₂ : Hom P₂ B}{g₂ : Hom P₂ A}{f₁ : Hom P₁ B}{g₁ : Hom P₁ A}
                                        (sq₂ : CommutingSquare g₂ f f₂ g) (sq₁ : CommutingSquare g₁ f f₁ g) : Set m where
@@ -92,69 +75,67 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
     square : CommutingSquare g' f f' g
     square = commutingSquare commuting
 
+    reduceCone : {Q : Obj} {f'' : Hom Q B} {g'' : Hom Q A} (sq : CommutingSquare g'' f f'' g) -> PullbackSquareReduction sq square
+    reduceCone sq = reduction where open UniquePullbackSquareReduction (universal sq)
+
+    proveId : (red : PullbackSquareReduction square square) -> PullbackSquareReduction.u red ≡ id
+    proveId red = red=u =>>= flipEq id=u
+      where
+        open UniquePullbackSquareReduction (universal square)
+        id=u = unique (identityPullbackSquareReduction square)
+        red=u = unique red
+
   record PullbackOf {C A B : Obj} (f : Hom A C) (g : Hom B C) : Set (n ⊔ m) where
     field
-      cone : PullingBack f g
-      universal : (pb₂ : PullingBack f g) -> UniquePullingBackReduction pb₂ cone
+      P : Obj
+      f' : Hom P B
+      g' : Hom P A
+      pullback : Pullback f g f' g'
 
-    P = PullingBack.P cone
-    f' = PullingBack.f' cone
-    g' = PullingBack.g' cone
-    comm = PullingBack.comm cone
-
-    reduceCone : (pb : PullingBack f g) -> PullingBackReduction pb cone
-    reduceCone pb = reduction where open UniquePullingBackReduction (universal pb)
-
-    proveId : (red : PullingBackReduction cone cone) -> PullingBackReduction.u red ≡ id
-    proveId red =
-      let
-        open UniquePullingBackReduction (universal cone)
-        u_id = unique (identityPullingBackReduction cone)
-        u_red = unique red
-      in u_red =>>= flipEq u_id
+    open Pullback pullback public
 
 
   pullback_uniqueness : {C A B : Obj} {f : Hom A C} {g : Hom B C} (p1 p2 : PullbackOf f g) -> Σ (Hom (PullbackOf.P p1) (PullbackOf.P p2)) Iso
   pullback_uniqueness p1 p2 =
     let
-      open PullbackOf p1 renaming (cone to pb1 ; reduceCone to reduce1 ; proveId to proveId1)
-      open PullbackOf p2 renaming (cone to pb2 ; reduceCone to reduce2 ; proveId to proveId2)
+      open PullbackOf p1 renaming (square to pb1 ; reduceCone to reduce1 ; proveId to proveId1)
+      open PullbackOf p2 renaming (square to pb2 ; reduceCone to reduce2 ; proveId to proveId2)
 
-      r12 : PullingBackReduction pb1 pb2
+      r12 : PullbackSquareReduction pb1 pb2
       r12 = reduce2 pb1
 
-      r21 : PullingBackReduction pb2 pb1
+      r21 : PullbackSquareReduction pb2 pb1
       r21 = reduce1 pb2
 
-      u12 = PullingBackReduction.u r12
-      u21 = PullingBackReduction.u r21
+      u12 = PullbackSquareReduction.u r12
+      u21 = PullbackSquareReduction.u r21
     in u12 , record
                { inverse = u21
-               ; leftInverse  = proveId1 (composePullingBackReductions r21 r12)
-               ; rightInverse = proveId2 (composePullingBackReductions r12 r21)
+               ; leftInverse  = proveId1 (composePullbackSquareReductions r21 r12)
+               ; rightInverse = proveId2 (composePullbackSquareReductions r12 r21)
                }
                
   pullback_of_mono_is_mono : {A B C : Obj} {f : Hom A C} {g : Hom B C} -> (p : PullbackOf f g) -> Mono f -> Mono (PullbackOf.f' p)
   pullback_of_mono_is_mono {f = f} {g = g} p m =
     let
       open PullbackOf p
-      fg'=gf' = comm
+      fg'=gf' = commuting
     in mono λ {X} {α} {β} f'α=f'β ->
       let
         gf'α=gf'β = (g ∘_) $= f'α=f'β
         fg'α=gf'β = flipEq assoc =>>= ((_∘ α) $= fg'=gf') =>>=  assoc =>>= gf'α=gf'β
         fg'α=fg'β = fg'α=gf'β =>>= flipEq assoc =>>= flipEq ((_∘ β) $= fg'=gf') =>>= assoc
 
-        p2 : PullingBack f g
-        p2 = record { P = X ; f' = f' ∘ β ; g' = g' ∘ α ; comm = fg'α=gf'β }
+        p2 : CommutingSquare (g' ∘ α) f (f' ∘ β)  g
+        p2 = commutingSquare fg'α=gf'β
 
-        αr : PullingBackReduction p2 cone
-        αr = record { u = α ; ev₁ = f'α=f'β ; ev₂ = refl }
+        αr : PullbackSquareReduction p2 square
+        αr = record { u = α ; ev₁ = refl ; ev₂ = flipEq f'α=f'β }
 
-        βr : PullingBackReduction p2 cone
-        βr = record { u = β ; ev₁ = refl ; ev₂ = flipEq (Mono.elimL m  fg'α=fg'β) }
+        βr : PullbackSquareReduction p2 square
+        βr = record { u = β ; ev₁ = Mono.elimL m fg'α=fg'β ; ev₂ = refl }
 
-        open UniquePullingBackReduction (universal p2)
+        open UniquePullbackSquareReduction (universal p2)
         αu = unique αr
         βu = unique βr
       in αu =>>= flipEq βu
@@ -233,33 +214,31 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
       open Product (prod A₁ A₂) renaming (P to A₁xA₂ ; universal to prodUniversal)
       open Equalizer (equ (f ∘ π₁) (g ∘ π₂)) renaming (E to P ; comm to f∘π₁∘e=g∘π₂∘e ; universal to equUniversal)
     in record
-         { cone = record
-             { P = P
-             ; f' = π₂ ∘ e
-             ; g' = π₁ ∘ e
-             ; comm = flipEq assoc =>>= f∘π₁∘e=g∘π₂∘e =>>= assoc
-             }
-         ; universal = λ pb₂ →
-           let
-             open PullingBack pb₂ renaming (P to P₂ ; f' to f' ; g' to g' ; comm to fg'=gf')
-             open UniqueSpanReduction (prodUniversal (span g' f')) renaming (u to u₀ ; ev₁ to π₁u₀=g' ; ev₂ to π₂u₀=f' ; unique to prodUnique)
+       { P = P
+       ; f' = π₂ ∘ e
+       ; g' = π₁ ∘ e
+       ; pullback = record
+         { commuting = assocRL =>>= f∘π₁∘e=g∘π₂∘e =>>= assocLR
+         ; universal = λ { {P₂} {f'} {g'} (commutingSquare fg'=gf') →
+             let
+               open UniqueSpanReduction (prodUniversal (span g' f')) renaming (u to u₀ ; ev₁ to π₁u₀=g' ; ev₂ to π₂u₀=f' ; unique to prodUnique)
 
-             fπ₁u₀=gπ₂u₀ : ((f ∘ π₁) ∘ u₀) ≡ ((g ∘ π₂) ∘ u₀)
-             fπ₁u₀=gπ₂u₀ = assoc =>>= ((f ∘_) $= π₁u₀=g') =>>= fg'=gf' =>>= ((g ∘_) $= (flipEq π₂u₀=f')) =>>= (flipEq assoc)
-             open UniqueEqualizingReduction (equUniversal (equalizing P₂ u₀ fπ₁u₀=gπ₂u₀)) renaming (u to u ; ev to eu=u₀ ; unique to equUnique)
-           in record
-                { reduction = record
-                    { u = u
-                    ; ev₁ = assoc =>>= ((π₂ ∘_) $= eu=u₀) =>>= π₂u₀=f'
-                    ; ev₂ = assoc =>>= ((π₁ ∘_) $= eu=u₀) =>>= π₁u₀=g'
-                    }
-                ; unique = λ red₂ →
-                    let
-                      open PullingBackReduction red₂ renaming (u to u₂ ; ev₁ to π₂eu₂=f' ; ev₂ to π₁eu₂=g')
-
-                      eu₂=u₀ = prodUnique (record { u = e ∘ u₂ ; ev₁ = flipEq assoc =>>= π₁eu₂=g' ; ev₂ = flipEq assoc =>>= π₂eu₂=f' })
-                      u₂=u = equUnique (record { u = u₂ ; ev =  eu₂=u₀ })
-                    in u₂=u
-                }
+               fπ₁u₀=gπ₂u₀ : ((f ∘ π₁) ∘ u₀) ≡ ((g ∘ π₂) ∘ u₀)
+               fπ₁u₀=gπ₂u₀ = assocLR =>>= ((f ∘_) $= π₁u₀=g') =>>= fg'=gf' =>>= ((g ∘_) $= (flipEq π₂u₀=f')) =>>= assocRL
+               open UniqueEqualizingReduction (equUniversal (equalizing P₂ u₀ fπ₁u₀=gπ₂u₀)) renaming (u to u ; ev to eu=u₀ ; unique to equUnique)
+             in record
+               { reduction = record
+                 { u = u
+                 ; ev₁ = flipEq (assoc =>>= ((π₁ ∘_) $= eu=u₀) =>>= π₁u₀=g')
+                 ; ev₂ = flipEq (assoc =>>= ((π₂ ∘_) $= eu=u₀) =>>= π₂u₀=f')
+                 }
+               ; unique = λ { record { u = u₂ ; ev₁ = g'=π₁eu₂ ; ev₂ = f'=π₂eu₂ } →
+                   let
+                     eu₂=u₀ = prodUnique (record { u = e ∘ u₂ ; ev₁ = assocRL =>>= flipEq g'=π₁eu₂ ; ev₂ = assocRL =>>= flipEq f'=π₂eu₂ })
+                     u₂=u = equUnique (record { u = u₂ ; ev =  eu₂=u₀ })
+                   in u₂=u
+                 }
+               }
+           }
          }
-
+       }
