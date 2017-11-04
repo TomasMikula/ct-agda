@@ -361,10 +361,10 @@ module limits {k l : Level} (𝒞 : Category k l) where
         f'Cone : CommutingSquare 𝒞 f' ΔP f' m
         f'Cone = commutingSquare Δf'=mf'
 
-        open UniquePullbackSquareReduction (Luniversal f'Cone) renaming (u to h ; ev₂ to f'=Δ'h)
+        open UniqueSpanReduction (Luniversal f'Cone) renaming (u to h ; ev₂ to Δ'h=f')
 
         f=pΔ'h : {a : Obj J} -> f {a} ≡ p a ∘ (Δ' ∘ h)
-        f=pΔ'h {a} = f=pf' =>>= ((p a ∘_) $= f'=Δ'h)
+        f=pΔ'h {a} = f=pf' =>>= flipEq ((p a ∘_) $= Δ'h=f')
 
         f=gh : {a : Obj J} -> f {a} ≡ g a ∘ h
         f=gh {a} = f=pΔ'h {a} =>>= assocRL
@@ -382,7 +382,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
             Δ'h'=f' : Δ' ∘ h' ≡ f'
             Δ'h'=f' = f'unique Δ'h'red
 
-            Δ'h'=Δ'h = Δ'h'=f' =>>= f'=Δ'h
+            Δ'h'=Δ'h = Δ'h'=f' =>>= flipEq Δ'h=f'
             h'=h = Mono.elimL mono-Δ' Δ'h'=Δ'h
 
   -- Maranda theorem

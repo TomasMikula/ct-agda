@@ -18,20 +18,46 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
       elimR : { X : Obj } {g h : Hom B X} -> ((g ∘ f) ≡ (h ∘ f)) -> (g ≡ h)
     
   record Section {A B : Obj} (s : Hom A B) : Set l where
+    constructor hasRetraction
     field
       retraction : Hom B A
       evidence : (retraction ∘ s) ≡ id
 
   record Retraction {A B : Obj} (r : Hom A B) : Set l where
+    constructor hasSection
     field
       section : Hom B A
       evidence : (r ∘ section) ≡ id
 
   record Iso {A B : Obj} (f : Hom A B) : Set l where
+    constructor iso
     field
       inverse : Hom B A
       leftInverse  : (inverse ∘ f) ≡ id
       rightInverse : (f ∘ inverse) ≡ id
+
+  -- reduce f to g, via u
+  record MorphismReduction {A B C : Obj} (f : Hom A C) (g : Hom B C) : Set l where
+    constructor morphismReduction
+    field
+      u : Hom A B
+      ev : g ∘ u ≡ f
+
+  composeMorphismReductions : {A B C D : Obj} {f : Hom A D} {g : Hom B D} {h : Hom C D} ->
+                            MorphismReduction g h -> MorphismReduction f g -> MorphismReduction f h
+  composeMorphismReductions (morphismReduction u₂ hu₂=g) (morphismReduction u₁ gu₁=f) =
+    morphismReduction (u₂ ∘ u₁) (assocRL =>>= ((_∘ u₁) $= hu₂=g) =>>= gu₁=f)
+
+  identityMorphismReduction : {A B : Obj} (f : Hom A B) -> MorphismReduction f f
+  identityMorphismReduction f = morphismReduction id right_id
+
+  record UniqueMorphismReduction {A B C : Obj} (f : Hom A C) (g : Hom B C) : Set l where
+    constructor uniqueMorphismReduction
+    field
+      reduction : MorphismReduction f g
+      unique : (red₂ : MorphismReduction f g) -> MorphismReduction.u red₂ ≡ MorphismReduction.u reduction
+
+    open MorphismReduction reduction public
 
   record ExtremalMono {A B : Obj} (m : Hom A B) : Set (k ⊔ l) where
     field
@@ -95,7 +121,13 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
       open Epi e
       open Section s
 
-  mono_composition :  {A B C : Obj} {f : Hom B C} {g : Hom A B} -> Mono f -> Mono g -> Mono (f ∘ g)
+  iso_composition : {A B C : Obj} {f : Hom B C} {g : Hom A B} -> Iso f -> Iso g -> Iso (f ∘ g)
+  iso_composition {f = f} {g} (iso f⁻¹ f⁻¹f=id ff⁻¹=id) (iso g⁻¹ g⁻¹g=id gg⁻¹=id) =
+    iso (g⁻¹ ∘ f⁻¹)
+        (assocLR =>>= ((g⁻¹ ∘_) $= (assocRL =>>= ((_∘ g  ) $= f⁻¹f=id) =>>= left_id)) =>>= g⁻¹g=id)
+        (assocLR =>>= ((f   ∘_) $= (assocRL =>>= ((_∘ f⁻¹) $= gg⁻¹=id) =>>= left_id)) =>>= ff⁻¹=id)
+
+  mono_composition : {A B C : Obj} {f : Hom B C} {g : Hom A B} -> Mono f -> Mono g -> Mono (f ∘ g)
   mono_composition {f = f} {g = g} mf mg =
     mono λ {_} {α} {β} fgα=fgβ → g-elim (f-elim (assocRL =>>= fgα=fgβ =>>= assocLR))
       where f-elim = Mono.elimL mf ; g-elim = Mono.elimL mg
