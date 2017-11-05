@@ -14,7 +14,7 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
       evidence : f ∘ e ≡ g ∘ e
 
   record Equalizer {A B E : Obj} (f g : Hom A B) (e : Hom E A) : Set (n ⊔ m) where
-    constructor isEqualizer
+    constructor _universally_
     field
       cone : Equalizing f g e
       universal : {E₂ : Obj} {e₂ : Hom E₂ A} (eq₂ : Equalizing f g e₂) -> UniqueMorphismReduction e₂ e
@@ -46,8 +46,8 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
       { cone = isEqualizing ((_∘ id) $= f=g)
       ; universal =
         λ { {_} {e₂} _ → record
-            { reduction = morphismReduction e₂ left_id
-            ; unique = λ { (morphismReduction u id∘u=e₂) → flipEq left_id =>>= id∘u=e₂ }
+            { reduction = reduceMorphismBy e₂ witnessedBy left_id
+            ; unique = λ { (reduceMorphismBy u witnessedBy id∘u=e₂) → flipEq left_id =>>= id∘u=e₂ }
             }
           }
       }
@@ -97,9 +97,12 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
       β=u = unique redβ
     in α=u =>>= flipEq β=u
 
+  equalizer_is_mono' : {A B E : Obj} {f g : Hom A B} {e : Hom E A} (eq : Equalizer f g e) -> Mono e
+  equalizer_is_mono' {E = E} {e = e} eq = equalizer_is_mono (equalizerData E e eq)
+
   epi_equalizer_is_iso : {A B : Obj} {f g : Hom A B} (eq : EqualizerOf f g) -> Epi (EqualizerOf.e eq) -> Iso (EqualizerOf.e eq)
   epi_equalizer_is_iso {f = f} {g} eq isEpi with equalizer_is_mono eq
-  epi_equalizer_is_iso {f = f} {g} (equalizerData E e (isEqualizer (isEqualizing fe=ge) universal)) (epi elim-e) | mono-e = mono_retraction_is_iso mono-e retr-e
+  epi_equalizer_is_iso {f = f} {g} (equalizerData E e ((isEqualizing fe=ge) universally universal)) (epi elim-e) | mono-e = mono_retraction_is_iso mono-e retr-e
     where
       f=g = elim-e fe=ge
 
@@ -108,7 +111,7 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
 
       retr-e : Retraction e
       retr-e = case (universal idEq) of
-        λ { (uniqueMorphismReduction (morphismReduction e⁻¹ ee⁻¹=id) _) → hasSection e⁻¹ ee⁻¹=id }
+        λ { ((reduceMorphismBy e⁻¹ witnessedBy ee⁻¹=id) uniquely _) → hasSection e⁻¹ ee⁻¹=id }
 
   -- A different proof of the same fact.
   epi_equalizer_is_iso' : {A B : Obj} {f g : Hom A B} (eq : EqualizerOf f g) -> Epi (EqualizerOf.e eq) -> Iso (EqualizerOf.e eq)
@@ -123,7 +126,7 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
 
       iso-e : Iso e
       iso-e with equalizer_uniqueness idEq eq
-      ... | (morphismReduction d ed=id , iso d⁻¹ d⁻¹d=id dd⁻¹=id) =
+      ... | (reduceMorphismBy d witnessedBy ed=id , iso d⁻¹ d⁻¹d=id dd⁻¹=id) =
         case d⁻¹=e of λ { refl -> iso d dd⁻¹=id d⁻¹d=id } where
           d⁻¹=e = flipEq left_id =>>= ((_∘ d⁻¹) $= flipEq ed=id) =>>= assocLR =>>= ((e ∘_) $= dd⁻¹=id) =>>= right_id
 

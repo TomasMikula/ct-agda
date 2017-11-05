@@ -38,40 +38,26 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
 
   -- reduce f to g, via u
   record MorphismReduction {A B C : Obj} (f : Hom A C) (g : Hom B C) : Set l where
-    constructor morphismReduction
+    constructor reduceMorphismBy_witnessedBy_
     field
       u : Hom A B
       ev : g ∘ u ≡ f
 
   composeMorphismReductions : {A B C D : Obj} {f : Hom A D} {g : Hom B D} {h : Hom C D} ->
                             MorphismReduction g h -> MorphismReduction f g -> MorphismReduction f h
-  composeMorphismReductions (morphismReduction u₂ hu₂=g) (morphismReduction u₁ gu₁=f) =
-    morphismReduction (u₂ ∘ u₁) (assocRL =>>= ((_∘ u₁) $= hu₂=g) =>>= gu₁=f)
+  composeMorphismReductions (reduceMorphismBy u₂ witnessedBy hu₂=g) (reduceMorphismBy u₁ witnessedBy gu₁=f) =
+    reduceMorphismBy (u₂ ∘ u₁) witnessedBy (assocRL =>>= ((_∘ u₁) $= hu₂=g) =>>= gu₁=f)
 
   identityMorphismReduction : {A B : Obj} (f : Hom A B) -> MorphismReduction f f
-  identityMorphismReduction f = morphismReduction id right_id
+  identityMorphismReduction f = reduceMorphismBy id witnessedBy right_id
 
   record UniqueMorphismReduction {A B C : Obj} (f : Hom A C) (g : Hom B C) : Set l where
-    constructor uniqueMorphismReduction
+    constructor _uniquely_
     field
       reduction : MorphismReduction f g
       unique : (red₂ : MorphismReduction f g) -> MorphismReduction.u red₂ ≡ MorphismReduction.u reduction
 
     open MorphismReduction reduction public
-
-  record ExtremalMono {A B : Obj} (m : Hom A B) : Set (k ⊔ l) where
-    field
-      monic : Mono m
-      extremal : {X : Obj} (f : Hom X B) (e : Hom A X) -> m ≡ f ∘ e -> Epi e -> Iso e
-
-  orthogonal : {A B C D : Obj} (f : Hom A B) (g : Hom C D) -> Set l
-  orthogonal {A} {B} {C} {D} f g =
-    (u : Hom A C) (v : Hom B D) -> (v ∘ f) ≡ (g ∘ u) -> ∃[ w ] ((v ≡ g ∘ w) × (u ≡ w ∘ f))
-
-  record StrongMono {A B : Obj} (m : Hom A B) : Set (k ⊔ l) where
-    field
-      monic : Mono m
-      strong : {C D : Obj} (e : Hom C D) -> Epi e -> orthogonal e m
 
   section_is_mono : {A B : Obj} {f : Hom A B} -> Section f -> Mono f
   section_is_mono {f = f} s = mono λ {x} → λ {g} → λ {h} → λ p → 
@@ -132,53 +118,7 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
     mono λ {_} {α} {β} fgα=fgβ → g-elim (f-elim (assocRL =>>= fgα=fgβ =>>= assocLR))
       where f-elim = Mono.elimL mf ; g-elim = Mono.elimL mg
 
-  epi_extrermal_mono_is_iso : {A B : Obj} {f : Hom A B} -> Epi f -> ExtremalMono f -> Iso f
-  epi_extrermal_mono_is_iso {f = f} epi-f ext-f = extremal id f (flipEq left_id) epi-f
-    where open ExtremalMono ext-f
-
-  strong_mono_composition : {A B C : Obj} {f : Hom B C} {g : Hom A B} -> StrongMono f -> StrongMono g -> StrongMono (f ∘ g)
-  strong_mono_composition {f = f} {g = g} sf sg =
-    record { monic = mono_composition mono-f mono-g
-           ; strong = strong }
-    where
-      open StrongMono sf renaming (monic to mono-f ; strong to strong-f)
-      open StrongMono sg renaming (monic to mono-g ; strong to strong-g)
-
-      strong : {C D : Obj} (e : Hom C D) → Epi e → orthogonal e (f ∘ g)
-      strong e epi-e u v ve=fgu =
-        case (strong-f e epi-e (g ∘ u) v (ve=fgu =>>= assocLR)) of
-        λ { (w' , v=fw' , gu=w'e) →
-            case (strong-g e epi-e u w' (flipEq gu=w'e)) of
-            λ { (w , w'=gw , u=we) → (w , v=fw' =>>= ((f ∘_) $= w'=gw) =>>= assocRL , u=we) }
-          }
-
-  strong_mono_is_extremal : {A B : Obj} {m : Hom A B} -> StrongMono m -> ExtremalMono m
-  strong_mono_is_extremal sm = record
-    { monic = StrongMono.monic sm
-    ; extremal = λ f e m=fe epi-e →
-        case (StrongMono.strong sm e epi-e id f (flipEq (right_id =>>= m=fe))) of
-        λ { (e⁻¹ , f=me⁻¹ , id=e⁻¹e) →
-          epi_section_is_iso epi-e (record { retraction = e⁻¹ ; evidence = flipEq id=e⁻¹e })
-        }
-    }
-
   mono-decomposition : {A B C : Obj} (f : Hom B C) (g : Hom A B) -> Mono (f ∘ g) -> Mono g
   mono-decomposition f g mono-fg =
     mono (λ gα=gβ -> elimL (assocLR =>>= ((f ∘_) $= gα=gβ) =>>= assocRL))
     where open Mono mono-fg using (elimL)
-
-  extremal-mono-decomposition : {A B C : Obj} (f : Hom B C) (g : Hom A B) -> ExtremalMono (f ∘ g) -> ExtremalMono g
-  extremal-mono-decomposition f g ext-fg = record
-    { monic = mono-decomposition f g mono-fg
-    ; extremal = λ h e g=he epi-e → extremal-fg (f ∘ h) e ((f ∘_) $= g=he =>>= assocRL) epi-e
-    } where
-        open ExtremalMono ext-fg renaming (monic to mono-fg ; extremal to extremal-fg)
-
-  strong-mono-decomposition : {A B C : Obj} (f : Hom B C) (g : Hom A B) -> StrongMono (f ∘ g) -> StrongMono g
-  strong-mono-decomposition f g str-fg = record
-    { monic = mono-decomposition f g mono-fg
-    ; strong = λ e epi-e u v ve=gu →
-        case (strong-fg e epi-e u (f ∘ v) (assocLR =>>= ((f ∘_) $= ve=gu) =>>= assocRL)) of
-        λ { (w , fv=fgw , u=we) → (w , Epi.elimR epi-e (ve=gu =>>= ((g ∘_) $= u=we) =>>= assocRL) , u=we) }
-    } where
-        open StrongMono str-fg renaming (monic to mono-fg ; strong to strong-fg)
