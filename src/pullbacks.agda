@@ -166,10 +166,11 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   open import equalizers 𝒞
 
   -- Construction of pullbacks from products and equalizers
-  pullback_construction : ((A B : Obj) -> Product A B) ->
-                          ({A B : Obj} -> (f g : Hom A B) -> EqualizerOf f g) ->
-                          {A₁ A₂ C : Obj} -> (f : Hom A₁ C) -> (g : Hom A₂ C) -> PullbackOf f g
-  pullback_construction prod equ {A₁} {A₂} {C} f g =
+  pullbacks_from_products_and_equalizers :
+    ((A B : Obj) -> Product A B) ->
+    ({A B : Obj} -> (f g : Hom A B) -> EqualizerOf f g) ->
+    {A₁ A₂ C : Obj} -> (f : Hom A₁ C) -> (g : Hom A₂ C) -> PullbackOf f g
+  pullbacks_from_products_and_equalizers prod equ {A₁} {A₂} {C} f g =
     let
       open Product (prod A₁ A₂) renaming (P to A₁xA₂ ; universal to prodUniversal)
       open EqualizerOf (equ (f ∘ π₁) (g ∘ π₂)) renaming (E to P ; evidence to f∘π₁∘e=g∘π₂∘e ; universal to equUniversal)

@@ -21,6 +21,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     identity = Functor.identity functor
       
   record Cone {nj mj : Level} {J : Category nj mj} (D : Diagram J) : Set (k ⊔ l ⊔ nj ⊔ mj) where
+    constructor coneFrom_by_
     open Diagram D renaming (functor to F)
     field
       C : Obj 𝒞
@@ -29,6 +30,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     naturality = NatTrans.naturality trans
 
   record ConeReduction {nj mj : Level} {J : Category nj mj} {D : Diagram J} (c₁ : Cone D) (c₂ : Cone D) : Set (l ⊔ nj) where
+    constructor reduceConeBy_witnessedBy_
     open Cone c₁ renaming (C to C₁ ; τ to τ₁)
     open Cone c₂ renaming (C to C₂ ; τ to τ₂)
     field
@@ -36,6 +38,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
       ev : {A : Obj J} -> τ₁ {A} ≡ τ₂ ∘ u
       
   record UniqueConeReduction {nj mj : Level} {J : Category nj mj} {D : Diagram J} (C₁ : Cone D) (C₂ : Cone D) : Set (l ⊔ nj) where
+    constructor _uniquely_
     field
       reduction : ConeReduction C₁ C₂
       unique : (r : ConeReduction C₁ C₂) -> ConeReduction.u r ≡ ConeReduction.u reduction
@@ -184,134 +187,115 @@ module limits {k l : Level} (𝒞 : Category k l) where
     -- and binary pullbacks,
     ({A B C : Obj 𝒞} (f : Hom 𝒞 A C) (g : Hom 𝒞 B C) -> PullbackOf 𝒞 f g) ->
     -- for any diagram
-    {nj mj : Level} {J : Category nj mj} -> (D : Diagram J) ->
+    {k l : Level} {K : Category k l} -> (D : Diagram K) ->
     -- with at least two objects
-    (c₁ c₂ : Obj J) -> c₂ ≢ c₁ ->
+    (c₁ c₂ : Obj K) -> c₂ ≢ c₁ ->
     -- and decidable equality of objects,
-    ((A B : Obj J) -> A ≡ B ⊎ A ≢ B) ->
+    ((a b : Obj K) -> a ≡ b ⊎ a ≢ b) ->
     -- we have a limit.
     LimitOf D
-  limits-from-products-and-pullbacks prod pb {J = J} D c₁ c₂ c₂≠c₁ cmp =
+  limits-from-products-and-pullbacks prod pb {K = K} D c₁ c₂ c₂≠c₁ cmp =
     record { cone = gCone ; universal = gUniversal }
    where
-    open Diagram D renaming (functor to DF)
-    open Functor DF renaming (mapObj to DObj ; mapArr to DArr)
+    open Functor (Diagram.functor D) renaming (mapObj to DObj ; mapArr to DArr)
     
     P' = prod (discreteDiagram D)
-    open LimitOf P' renaming ( C to P
-                             ; cone to Pcone
-                             ; universal to Puniversal )
-    p : (A : Obj J) -> Hom 𝒞 P (DObj A)
+    open LimitOf P' renaming ( C to P ; cone to Pcone ; universal to Puniversal )
+    p : (a : Obj K) -> Hom 𝒞 P (DObj a)
     p a = LimitOf.τ P' {a}
 
-    M = HomSet J
+    M = HomSet K
     Pᴹdiagram = powerDiagram P M
     Pᴹ' = prod Pᴹdiagram
-    open LimitOf Pᴹ' renaming ( C to Pᴹ
-                              ; cone to Pᴹcone
-                              ; universal to Pᴹuniversal )
-    q' : HomSet J -> Hom 𝒞 Pᴹ P
+    open LimitOf Pᴹ' renaming ( C to Pᴹ ; cone to Pᴹcone ; universal to Pᴹuniversal )
+    q' : M -> Hom 𝒞 Pᴹ P
     q' α = LimitOf.τ Pᴹ' {α}
-    q : {a c : Obj J} (α : Hom J a c) -> Hom 𝒞 Pᴹ P
+    q : {a c : Obj K} (α : Hom K a c) -> Hom 𝒞 Pᴹ P
     q {a} {c} α = q' (a , c , α)
 
     -- If two morphisms into Pᴹ behave equally under projections q and p, they are equal.
     equal-under-q-p : {X : Obj 𝒞} {f g : Hom 𝒞 X Pᴹ} ->
-                      ({a c : Obj J} (α : Hom J a c) (b : Obj J) -> p b ∘ (q α ∘ f) ≡ p b ∘ (q α ∘ g)) ->
+                      ({a c : Obj K} (α : Hom K a c) (b : Obj K) -> p b ∘ (q α ∘ f) ≡ p b ∘ (q α ∘ g)) ->
                       f ≡ g
     equal-under-q-p {_} {f} {g} pqf=pqg = equal-under-projections Pᴹ' qf=qg where
-      qf=qg : (α : HomSet J) -> q' α ∘ f ≡ q' α ∘ g
+      qf=qg : (α : M) -> q' α ∘ f ≡ q' α ∘ g
       qf=qg (a , c , α) = equal-under-projections P' (pqf=pqg α)
 
     -- define morphism m by how it behaves under projections q and p
-    pqm : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> Hom 𝒞 P (DObj b)
+    pqm : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> Hom 𝒞 P (DObj b)
     pqm {a} {c} α b with cmp c b
     ...                | inj₁ c=b rewrite c=b = DArr(α) ∘ (p a)
     ...                | inj₂ c≠b             = p b
     
-    Dspan : {a c : Obj J} -> Hom J a c -> Cone (discreteDiagram D)
-    Dspan α = record
-      { C = P
-      ; trans = record
-          { τ = pqm α _
-          ; naturality = λ { refl → r-id =>>= (flipEq l-id)}
-          }
-      }
+    Dspan : {a c : Obj K} -> Hom K a c -> Cone (discreteDiagram D)
+    Dspan α = coneFrom P by (natTrans (pqm α _) witnessedBy λ { refl → r-id =>>= (flipEq l-id) })
 
     Pᴹspan : Cone Pᴹdiagram
-    Pᴹspan = record
-      { C = P
-      ; trans = record
-          { τ = λ { {(a , c , α)} → UniqueConeReduction.u (Puniversal (Dspan α)) }
-          ; naturality = λ { refl → r-id =>>= flipEq l-id }
-          }
-      }
+    Pᴹspan = coneFrom P by (
+               natTrans (λ { {(a , c , α)} → UniqueConeReduction.u (Puniversal (Dspan α)) })
+                 witnessedBy λ { refl → r-id =>>= flipEq l-id } )
 
     open UniqueConeReduction (Pᴹuniversal Pᴹspan) renaming (u to m ; ev to qm=q∘m)
 
-    pqm=p∘q∘m : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> (pqm α b) ≡ (p b ∘ q α) ∘ m
-    pqm=p∘q∘m {a} {c} α b = pqmαb=pb∘qmα =>>= pb∘qmα=pb∘qα∘m
-      where
-        open UniqueConeReduction (Puniversal (Dspan α)) renaming (u to qmα ; ev to pqmα=p∘qmα)
-        pqmαb=pb∘qmα : pqm α b ≡ p b ∘ qmα
-        pqmαb=pb∘qmα = pqmα=p∘qmα {b}
-        pb∘qmα=pb∘qα∘m : p b ∘ qmα ≡ (p b ∘ q α) ∘ m
-        pb∘qmα=pb∘qα∘m = ((p b ∘_) $= qm=q∘m {a , c , α}) =>>= assocRL
+    pqm=p∘q∘m : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> (pqm α b) ≡ (p b ∘ q α) ∘ m
+    pqm=p∘q∘m {a} {c} α b = pqmαb=pb∘qmα =>>= pb∘qmα=pb∘qα∘m where
+      open UniqueConeReduction (Puniversal (Dspan α)) renaming (u to qmα ; ev to pqmα=p∘qmα)
+      pqmαb=pb∘qmα : pqm α b ≡ p b ∘ qmα
+      pqmαb=pb∘qmα = pqmα=p∘qmα {b}
+      pb∘qmα=pb∘qα∘m : p b ∘ qmα ≡ (p b ∘ q α) ∘ m
+      pb∘qmα=pb∘qα∘m = ((p b ∘_) $= qm=q∘m {a , c , α}) =>>= assocRL
 
-    pqm=Dp : {b a : Obj J} (α : Hom J a b) -> (p b ∘ q α) ∘ m ≡ DArr α ∘ p a
-    pqm=Dp {b} {a} α = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=Dα∘pa
-      where
-        pqmbα=Dα∘pa : pqm α b ≡ DArr α ∘ p a
-        pqmbα=Dα∘pa with cmp b b
-        ...            | inj₁ refl = refl
-        ...            | inj₂ b≠b  = ⊥-elim (b≠b refl)
+    pqm=Dp : {b a : Obj K} (α : Hom K a b) -> (p b ∘ q α) ∘ m ≡ DArr α ∘ p a
+    pqm=Dp {b} {a} α = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=Dα∘pa where
+      pqmbα=Dα∘pa : pqm α b ≡ DArr α ∘ p a
+      pqmbα=Dα∘pa with cmp b b
+      ...            | inj₁ refl = refl
+      ...            | inj₂ b≠b  = ⊥-elim (b≠b refl)
 
-    pqm=p : {b a c : Obj J} (α : Hom J a c) -> c ≢ b -> (p b ∘ q α) ∘ m ≡ p b
-    pqm=p {b} {a} {c} α c≠b = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=pb
-      where
-        pqmbα=pb : pqm α b ≡ p b
-        pqmbα=pb with cmp c b
-        ...         | inj₁ c=b = ⊥-elim (c≠b c=b)
-        ...         | inj₂ c≠b = refl
+    pqm=p : {b a c : Obj K} (α : Hom K a c) -> c ≢ b -> (p b ∘ q α) ∘ m ≡ p b
+    pqm=p {b} {a} {c} α c≠b = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=pb where
+      pqmbα=pb : pqm α b ≡ p b
+      pqmbα=pb with cmp c b
+      ...         | inj₁ c=b = ⊥-elim (c≠b c=b)
+      ...         | inj₂ c≠b = refl
 
     ΔP : Hom 𝒞 P Pᴹ
     ΔP = Δ Pᴹ'
     mono-ΔP : Mono ΔP
-    mono-ΔP = Δ-is-mono {P} {_} {M} (c₁ , c₁ , id J {c₁}) Pᴹ'
+    mono-ΔP = Δ-is-mono {P} {_} {M} (c₁ , c₁ , id K {c₁}) Pᴹ'
 
-    qΔ=id : {a c : Obj J} {α : Hom J a c} -> q α ∘ ΔP ≡ idC
+    qΔ=id : {a c : Obj K} {α : Hom K a c} -> q α ∘ ΔP ≡ idC
     qΔ=id = pᵢΔ=id {L = Pᴹ'}
-    
+
     open PullbackOf (pb ΔP m) renaming (P to L ; f' to Δ' ; g' to m' ; commuting to Δm'=mΔ' ; universal to Luniversal)
 
     mono-Δ' : Mono Δ'
     mono-Δ' = pullback_of_mono_is_mono 𝒞 (pb ΔP m) mono-ΔP
 
     -- For any b, pick α : a -> c such that c ≠ b.
-    acα≠ : (b : Obj J) -> Σ ((Obj J) × (Obj J)) λ {(a , c) -> (Hom J a c) × (c ≢ b)} 
+    acα≠ : (b : Obj K) -> ∃[ a ] ∃[ c ] ((Hom K a c) × (c ≢ b))
     acα≠ b with cmp c₁ b
-    ...       | inj₁ refl = (c₂ , c₂) , (id J {c₂} , c₂≠c₁)
-    ...       | inj₂ c₁≠b = (c₁ , c₁) , (id J {c₁} , c₁≠b)
+    ...       | inj₁ refl = (c₂ , c₂ , id K {c₂} , c₂≠c₁)
+    ...       | inj₂ c₁≠b = (c₁ , c₁ , id K {c₁} , c₁≠b )
        
-    pm'=pΔ' : (b : Obj J) → (p b ∘ m') ≡ (p b ∘ Δ')
+    pm'=pΔ' : (b : Obj K) → (p b ∘ m') ≡ (p b ∘ Δ')
     pm'=pΔ' b with acα≠ b
-    ...          | ((a , c) , α , c≠b) =
-      let
+    ...          | (a , c , α , c≠b) = flipEq pbΔ'=pbm'
+      where
         pb=pbqαm : p b ≡ (p b ∘ q α) ∘ m
         pb=pbqαm = flipEq (pqm=p α c≠b)
         pbΔ'=pbqαmΔ' = ((_∘ Δ') $= pb=pbqαm) =>>= assocLR
         pbΔ'=pbqαΔm' = pbΔ'=pbqαmΔ' =>>= (((p b ∘ q α) ∘_) $= (flipEq Δm'=mΔ')) =>>= assocLR
         qαΔm'=m' = assocRL =>>= ((_∘ m') $= qΔ=id) =>>= l-id
         pbΔ'=pbm' = pbΔ'=pbqαΔm' =>>= (((p b) ∘_) $= qαΔm'=m')
-      in flipEq pbΔ'=pbm'
     
     m'=Δ' : m' ≡ Δ'
     m'=Δ' = equal-under-projections P' pm'=pΔ'
 
-    g : (a : Obj J) -> Hom 𝒞 L (DObj a)
+    g : (a : Obj K) -> Hom 𝒞 L (DObj a)
     g a = p a ∘ Δ'
 
-    Dg=g : {a b : Obj J} (α : Hom J a b) -> (DArr α) ∘ g a ≡ g b
+    Dg=g : {a b : Obj K} (α : Hom K a b) -> (DArr α) ∘ g a ≡ g b
     Dg=g {a} {b} α = Dαga=DαpaΔ' =>>= DαpaΔ'=pbqαmΔ' =>>= pbqαmΔ'=pbqαΔm' =>>= pbqαΔm'=pbm' =>>= pbm'=gb
       where
         Dαga=DαpaΔ'     : (DArr α) ∘ g a ≡ (DArr α ∘ p a) ∘ Δ'
@@ -326,64 +310,49 @@ module limits {k l : Level} (𝒞 : Category k l) where
         pbm'=gb         = pm'=pΔ' b
     
     gCone : Cone D
-    gCone = record
-      { C = L
-      ; trans = record
-          { τ = λ {a} → g a
-          ; naturality = λ α → r-id =>>= flipEq (Dg=g α)
-          }
-      }
+    gCone = coneFrom L by (natTrans (g _) witnessedBy λ α → r-id =>>= flipEq (Dg=g α))
 
     gUniversal : (fCone : Cone D) -> UniqueConeReduction fCone gCone
-    gUniversal fCone = record { reduction = f-to-g ; unique = f-to-g-uniqueness }
-      where
-        open Cone fCone renaming (C to X ; τ to f ; naturality to f=Df)
-        open UniqueConeReduction (Puniversal (discreteCone fCone)) renaming (u to f' ; unique to f'unique ; ev to f=pf')
+    gUniversal fCone @ (coneFrom C by (natTrans f witnessedBy f=Df)) = (reduceConeBy h witnessedBy f=gh) uniquely h-uniqueness where
+      open UniqueConeReduction (Puniversal (discreteCone fCone)) renaming (u to f' ; unique to f'unique ; ev to f=pf')
 
-        Δf'=mf' : ΔP ∘ f' ≡ m ∘ f'
-        Δf'=mf' = equal-under-q-p pqΔf'=pqmf'
-          where
-            pqΔf'=f : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> (p b ∘ q α) ∘ (ΔP ∘ f') ≡ f {b}
-            pqΔf'=f α b = assocLR =>>= ((p b ∘_) $= (assocRL =>>= ((_∘ f') $= qΔ=id =>>= l-id)) =>>= (flipEq f=pf'))
-            
-            pqmf'=f : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> (p b ∘ q α) ∘ (m ∘ f') ≡ f {b}
-            pqmf'=f {a} {c} α b with cmp c b
-            ...                    | inj₁ refl = pbqαmf'=Dαpaf' =>>= Dαpaf'=Dαfa =>>= Dαfa=fb
-                                       where
-                                         pbqαmf'=Dαpaf' = assocRL =>>= ((_∘ f') $= (pqm=Dp α))
-                                         Dαpaf'=Dαfa = assocLR =>>= ((DArr α ∘_) $= flipEq f=pf')
-                                         Dαfa=fb = flipEq (f=Df α) =>>= r-id
-            ...                    | inj₂ c≠b  = assocRL =>>= ((_∘ f') $= (pqm=p α c≠b)) =>>= flipEq f=pf'
-            
-            pqΔf'=pqmf' : {a c : Obj J} (α : Hom J a c) (b : Obj J) -> p b ∘ (q α ∘ (ΔP ∘ f')) ≡ p b ∘ (q α ∘ (m ∘ f'))
-            pqΔf'=pqmf' {a} {c} α b = assocRL =>>= (pqΔf'=f α b) =>>= flipEq (pqmf'=f α b) =>>= assocLR
-
-        f'Cone : CommutingSquare 𝒞 f' ΔP f' m
-        f'Cone = commutingSquare Δf'=mf'
-
-        open UniqueSpanReduction (Luniversal f'Cone) renaming (u to h ; ev₂ to Δ'h=f')
-
-        f=pΔ'h : {a : Obj J} -> f {a} ≡ p a ∘ (Δ' ∘ h)
-        f=pΔ'h {a} = f=pf' =>>= flipEq ((p a ∘_) $= Δ'h=f')
-
-        f=gh : {a : Obj J} -> f {a} ≡ g a ∘ h
-        f=gh {a} = f=pΔ'h {a} =>>= assocRL
+      Δf'=mf' : ΔP ∘ f' ≡ m ∘ f'
+      Δf'=mf' = equal-under-q-p pqΔf'=pqmf' where
+        pqΔf'=f : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> (p b ∘ q α) ∘ (ΔP ∘ f') ≡ f {b}
+        pqΔf'=f α b = assocLR =>>= ((p b ∘_) $= (assocRL =>>= ((_∘ f') $= qΔ=id =>>= l-id)) =>>= (flipEq f=pf'))
         
-        f-to-g : ConeReduction fCone gCone
-        f-to-g = record { u = h ; ev = f=gh }
+        pqmf'=f : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> (p b ∘ q α) ∘ (m ∘ f') ≡ f {b}
+        pqmf'=f {a} {c} α b with cmp c b
+        ...                    | inj₁ refl = pbqαmf'=Dαpaf' =>>= Dαpaf'=Dαfa =>>= Dαfa=fb where
+                                   pbqαmf'=Dαpaf' = assocRL =>>= ((_∘ f') $= (pqm=Dp α))
+                                   Dαpaf'=Dαfa = assocLR =>>= ((DArr α ∘_) $= flipEq f=pf')
+                                   Dαfa=fb = flipEq (f=Df α) =>>= r-id
+        ...                    | inj₂ c≠b  = assocRL =>>= ((_∘ f') $= (pqm=p α c≠b)) =>>= flipEq f=pf'
 
-        f-to-g-uniqueness : (h'red : ConeReduction fCone gCone) -> ConeReduction.u h'red ≡ h
-        f-to-g-uniqueness h'red = h'=h
-          where
-            open ConeReduction h'red renaming (u to h' ; ev to f=gh')
-            Δ'h'red : ConeReduction (discreteCone fCone) Pcone
-            Δ'h'red = record { u =  Δ' ∘ h' ; ev = f=gh' =>>= assocLR }
-            
-            Δ'h'=f' : Δ' ∘ h' ≡ f'
-            Δ'h'=f' = f'unique Δ'h'red
+        pqΔf'=pqmf' : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> p b ∘ (q α ∘ (ΔP ∘ f')) ≡ p b ∘ (q α ∘ (m ∘ f'))
+        pqΔf'=pqmf' {a} {c} α b = assocRL =>>= (pqΔf'=f α b) =>>= flipEq (pqmf'=f α b) =>>= assocLR
 
-            Δ'h'=Δ'h = Δ'h'=f' =>>= flipEq Δ'h=f'
-            h'=h = Mono.elimL mono-Δ' Δ'h'=Δ'h
+      f'Cone : CommutingSquare 𝒞 f' ΔP f' m
+      f'Cone = commutingSquare Δf'=mf'
+
+      open UniqueSpanReduction (Luniversal f'Cone) renaming (u to h ; ev₂ to Δ'h=f')
+
+      f=pΔ'h : {a : Obj K} -> f {a} ≡ p a ∘ (Δ' ∘ h)
+      f=pΔ'h {a} = f=pf' =>>= flipEq ((p a ∘_) $= Δ'h=f')
+
+      f=gh : {a : Obj K} -> f {a} ≡ g a ∘ h
+      f=gh {a} = f=pΔ'h {a} =>>= assocRL
+
+      h-uniqueness : (h'red : ConeReduction fCone gCone) -> ConeReduction.u h'red ≡ h
+      h-uniqueness (reduceConeBy h' witnessedBy f=gh') = h'=h where
+        Δ'h'red : ConeReduction (discreteCone fCone) Pcone
+        Δ'h'red = reduceConeBy (Δ' ∘ h') witnessedBy (f=gh' =>>= assocLR)
+
+        Δ'h'=f' : Δ' ∘ h' ≡ f'
+        Δ'h'=f' = f'unique Δ'h'red
+
+        Δ'h'=Δ'h = Δ'h'=f' =>>= flipEq Δ'h=f'
+        h'=h = Mono.elimL mono-Δ' Δ'h'=Δ'h
 
   -- Maranda theorem
   limits-from-products-and-equalizers :
@@ -392,17 +361,17 @@ module limits {k l : Level} (𝒞 : Category k l) where
     -- and binary equalizers,
     ({A B : Obj 𝒞} (f g : Hom 𝒞 A B) -> EqualizerOf 𝒞 f g) ->
     -- for any diagram
-    {nj mj : Level} {J : Category nj mj} -> (D : Diagram J) ->
+    {k l : Level} {K : Category k l} -> (D : Diagram K) ->
     -- with at least two objects
-    (c₁ c₂ : Obj J) -> c₂ ≢ c₁ ->
+    (c₁ c₂ : Obj K) -> c₂ ≢ c₁ ->
     -- and decidable equality of objects,
-    ((A B : Obj J) -> A ≡ B ⊎ A ≢ B) ->
+    ((a b : Obj K) -> a ≡ b ⊎ a ≢ b) ->
     -- we have a limit.
     LimitOf D
-  limits-from-products-and-equalizers prod equ {J = J} D c₁ c₂ c₂≠c₁ cmp =
+  limits-from-products-and-equalizers prod equ {K = K} D c₁ c₂ c₂≠c₁ cmp =
     limits-from-products-and-pullbacks prod pb D c₁ c₂ c₂≠c₁ cmp
    where
      pb : {A B C : Obj 𝒞} (f : Hom 𝒞 A C) (g : Hom 𝒞 B C) -> PullbackOf 𝒞 f g
-     pb f g = pullback_construction 𝒞 binProd equ f g where
+     pb f g = pullbacks_from_products_and_equalizers 𝒞 binProd equ f g where
        binProd : (A B : Obj 𝒞) -> Product 𝒞 A B
        binProd A B = binaryProductFromLimit (prod (binaryProductDiagram A B))
