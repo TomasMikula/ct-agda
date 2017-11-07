@@ -36,6 +36,9 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
       leftInverse  : (inverse ∘ f) ≡ id
       rightInverse : (f ∘ inverse) ≡ id
 
+    reverse : Iso inverse
+    reverse = record { inverse = f ; leftInverse = rightInverse ; rightInverse = leftInverse }
+
   -- reduce f to g, via u
   record MorphismReduction {A B C : Obj} (f : Hom A C) (g : Hom B C) : Set l where
     constructor reduceMorphismBy_witnessedBy_

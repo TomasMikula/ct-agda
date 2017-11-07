@@ -8,6 +8,7 @@ open import functor
 open import nat-trans
 open import products
 open import pullbacks
+open import patterns
 
 module limits {k l : Level} (𝒞 : Category k l) where
   open Category using (Obj ; Hom ; HomSet ; id)
@@ -148,11 +149,12 @@ module limits {k l : Level} (𝒞 : Category k l) where
     })
 
   binaryProductFromLimit : {A B : Obj 𝒞} -> LimitOf (binaryProductDiagram A B) -> Product 𝒞 A B
-  binaryProductFromLimit {A} {B} L = record { P = P ; cone = Pspan ; universal = universality } where
+  binaryProductFromLimit {A} {B} L = record { P = P ; π₁ = pa ; π₂ = pb ; universal = universality } where
     open LimitOf L renaming (C to P ; τ to p)
-    Pspan = span (p {inl A}) (p {inr B})
-    universality : {X : Obj 𝒞} (s : Span 𝒞 X A B) → UniqueSpanReduction 𝒞 s Pspan
-    universality {X} s = record
+    pa = p {inl A}
+    pb = p {inr B}
+    universality : {X : Obj 𝒞} (x₁ : Hom 𝒞 X A) (x₂ : Hom 𝒞 X B) → UniqueSpanReduction 𝒞 x₁ x₂ pa pb
+    universality {X} x₁ x₂ = record
       { reduction = record
           { u = u
           ; ev₁ = flipEq ev
@@ -165,14 +167,14 @@ module limits {k l : Level} (𝒞 : Category k l) where
         sCone = record
           { C = X
           ; trans = record
-            { τ = λ { {inl _} → Span.f₁ s ; {inr _} → Span.f₂ s }
+            { τ = λ { {inl _} → x₁ ; {inr _} → x₂ }
             ; naturality = λ { {inl _} refl → r-id =>>= flipEq l-id
                              ; {inr _} refl → r-id =>>= flipEq l-id
                              }
             }
           }
         open UniqueConeReduction (universal sCone)
-        sUnique : (red₂ : SpanReduction 𝒞 s Pspan) → SpanReduction.u red₂ ≡ u
+        sUnique : (red₂ : SpanReduction 𝒞 x₁ x₂ pa pb) → SpanReduction.u red₂ ≡ u
         sUnique red₂ = unique (record
           { u = SpanReduction.u red₂
           ; ev = λ { {inl _} → flipEq (SpanReduction.ev₁ red₂)
@@ -270,7 +272,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     open PullbackOf (pb ΔP m) renaming (P to L ; f' to Δ' ; g' to m' ; commuting to Δm'=mΔ' ; universal to Luniversal)
 
     mono-Δ' : Mono Δ'
-    mono-Δ' = pullback_of_mono_is_mono 𝒞 (pb ΔP m) mono-ΔP
+    mono-Δ' = pullback_of_mono_is_mono' 𝒞 (pb ΔP m) mono-ΔP
 
     -- For any b, pick α : a -> c such that c ≠ b.
     acα≠ : (b : Obj K) -> ∃[ a ] ∃[ c ] ((Hom K a c) × (c ≢ b))
