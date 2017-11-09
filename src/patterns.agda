@@ -24,6 +24,7 @@ module patterns {k l : Level} (𝒞 : Category k l) where
   identitySpanReduction _ _ = record { u = id ; ev₁ = right_id ; ev₂ = right_id }
 
   record UniqueSpanReduction {X A A₁ A₂ : Obj} (x₁ : Hom X A₁) (x₂ : Hom X A₂) (a₁ : Hom A A₁) (a₂ : Hom A A₂) : Set l where
+    constructor _uniquely_
     field
       reduction : SpanReduction x₁ x₂ a₁ a₂
       unique : (red₂ : SpanReduction x₁ x₂ a₁ a₂) -> SpanReduction.u red₂ ≡ SpanReduction.u reduction
@@ -39,6 +40,7 @@ module patterns {k l : Level} (𝒞 : Category k l) where
       ev₂ : c₂ ≡ u ∘ d₂
 
   record UniqueCospanReduction {C D A₁ A₂ : Obj} (c₁ : Hom A₁ C) (c₂ : Hom A₂ C) (d₁ : Hom A₁ D) (d₂ : Hom A₂ D) : Set l where
+    constructor _uniquely_
     field
       reduction : CospanReduction c₁ c₂ d₁ d₂
       unique : (red₂ : CospanReduction c₁ c₂ d₁ d₂) -> CospanReduction.u red₂ ≡ CospanReduction.u reduction

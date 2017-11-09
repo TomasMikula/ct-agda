@@ -11,6 +11,7 @@ module pushouts {n m : Level} (𝒞 : Category n m) where
   open import op-patterns
 
   record Pushout {C A B P : Obj} (f : Hom C A) (g : Hom C B) (f' : Hom B P) (g' : Hom A P) : Set (m ⊔ n) where
+    constructor isPushout
     field
       commuting : f' ∘ g ≡ g' ∘ f
       universal : {Q : Obj} {f'' : Hom B Q} {g'' : Hom A Q} (sq : CommutingSquare g f'' f g'') -> UniqueCospanReduction g'' f'' g' f'
@@ -29,6 +30,7 @@ module pushouts {n m : Level} (𝒞 : Category n m) where
         red=u = unique red
 -}
   record PushoutOf {C A B : Obj} (f : Hom C A) (g : Hom C B) : Set (n ⊔ m) where
+    constructor pushoutData
     field
       P : Obj
       f' : Hom B P

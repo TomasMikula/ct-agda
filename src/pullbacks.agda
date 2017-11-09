@@ -10,6 +10,7 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   open import products 𝒞
 
   record Pullback {P A B C : Obj} (f : Hom A C) (g : Hom B C) (f' : Hom P B) (g' : Hom P A) : Set (m ⊔ n) where
+    constructor isPullback
     field
       commuting : f ∘ g' ≡ g ∘ f'
       universal : {Q : Obj} {f'' : Hom Q B} {g'' : Hom Q A} (sq : CommutingSquare g'' f f'' g) -> UniqueSpanReduction g'' f'' g' f'
