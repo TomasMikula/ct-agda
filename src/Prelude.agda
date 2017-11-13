@@ -1,6 +1,7 @@
 open import Agda.Primitive public
 open import Relation.Binary.Core public using (_≡_ ; _≢_ ; refl)
 open import Relation.Binary.HeterogeneousEquality public using (_≅_; refl ; ≅-to-≡)
+open import Data.Product
 
  -- Equal functions applied to equal arguments yield equal results.
 _=$=_ : {n m : Level} {A : Set n} {B : Set m} {f g : A -> B} {a1 a2 : A} (p : f ≡ g) (q : a1 ≡ a2) -> (f a1) ≡ (g a2)
@@ -28,6 +29,9 @@ refl ~$ a = refl
 
 _~$'_ : {n m : Level} {A : Set n} {B : A -> Set m} {f g : {a : A} -> B a} (p : (λ {a} -> f {a}) ≅ (λ {a} -> g {a})) (a : A) -> (f {a}) ≅ (g {a})
 refl ~$' a = refl
+
+_=,=_ : {n m : Level} {A : Set n} {B : Set m} {a1 a2 : A} {b1 b2 : B} -> a1 ≡ a2 -> b1 ≡ b2 -> (a1 , b1) ≡ (a2 , b2)
+refl =,= refl = refl
 
 infixl 20 _=$=_
 infixl 20 _$=_

@@ -24,6 +24,7 @@ record Category (n m : Level) : Set (lsuc (n ⊔ m)) where
   assocRL : {A B C D : Obj} {f : Hom C D} {g : Hom B C} {h : Hom A B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
   assocRL = flipEq assoc
 
+-- Opposite category.
 op : {n m : Level} -> Category n m -> Category n m
 op 𝒞 = record
          { Obj = Obj
@@ -51,3 +52,18 @@ op-involution {𝒞 = 𝒞} = op-op-𝒞=𝒞 where
 
   op-op-𝒞=𝒞 : op (op 𝒞) ≡ 𝒞
   op-op-𝒞=𝒞 = (λ (a : {A B C D : Obj 𝒞} {f : Hom 𝒞 C D} {g : Hom 𝒞 B C} {h : Hom 𝒞 A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)) -> category (Obj 𝒞) (Hom 𝒞) (id 𝒞) (_∘_) (left_id 𝒞) (right_id 𝒞) a) $= op-op-assoc=assoc
+
+-- Product of categories.
+_⨂_ : {nc mc nd md : Level} (𝒞 : Category nc mc) (𝒟 : Category nd md) -> Category (nc ⊔ nd) (mc ⊔ md)
+𝒞 ⨂ 𝒟 = category
+  (Obj 𝒞 × Obj 𝒟)
+  (λ { (C₁ , D₁) (C₂ , D₂) → Hom 𝒞 C₁ C₂ × Hom 𝒟 D₁ D₂ })
+  (id 𝒞 , id 𝒟)
+  (λ { (f₁ , g₁) (f₂ , g₂) -> (f₁ 𝒞∘ f₂ , g₁ 𝒟∘ g₂) })
+  (𝒞-l-id =,= 𝒟-l-id)
+  (𝒞-r-id =,= 𝒟-r-id)
+  (𝒞-assoc =,= 𝒟-assoc)
+ where
+  open Category
+  open Category 𝒞 using () renaming (_∘_ to _𝒞∘_ ; left_id to 𝒞-l-id ; right_id to 𝒞-r-id ; assoc to 𝒞-assoc)
+  open Category 𝒟 using () renaming (_∘_ to _𝒟∘_ ; left_id to 𝒟-l-id ; right_id to 𝒟-r-id ; assoc to 𝒟-assoc)
