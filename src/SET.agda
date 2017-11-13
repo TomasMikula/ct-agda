@@ -5,7 +5,7 @@ open import category
 SET : Category _ _
 SET = record
         { Obj = Set
-        ; Hom = λ A B → (A -> B)
+        ; Mph = λ A B → (A -> B)
         ; id = λ x → x
         ; _∘_ = λ f g x → f (g x)
 

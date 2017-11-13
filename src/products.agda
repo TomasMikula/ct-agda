@@ -11,11 +11,11 @@ module products {n m : Level} (𝒞 : Category n m) where
   record Product (A B : Obj) : Set (n ⊔ m) where
     field
       P : Obj
-      π₁ : Hom P A
-      π₂ : Hom P B
-      universal : {Q : Obj} (q₁ : Hom Q A) (q₂ : Hom Q B) -> UniqueSpanReduction q₁ q₂ π₁ π₂
+      π₁ : Mph P A
+      π₂ : Mph P B
+      universal : {Q : Obj} (q₁ : Mph Q A) (q₂ : Mph Q B) -> UniqueSpanReduction q₁ q₂ π₁ π₂
 
-    reduceCone : {Q : Obj} (q₁ : Hom Q A) (q₂ : Hom Q B) -> SpanReduction q₁ q₂ π₁ π₂
+    reduceCone : {Q : Obj} (q₁ : Mph Q A) (q₂ : Mph Q B) -> SpanReduction q₁ q₂ π₁ π₂
     reduceCone q₁ q₂ = UniqueSpanReduction.reduction (universal q₁ q₂)
 
     proveId : (red : SpanReduction π₁ π₂ π₁ π₂) -> SpanReduction.u red ≡ id
@@ -26,7 +26,7 @@ module products {n m : Level} (𝒞 : Category n m) where
         u_red = unique red
       in u_red =>>= flipEq u_id
 
-  product_uniqueness : {A B : Obj} (p q : Product A B) -> Σ (Hom (Product.P p) (Product.P q)) Iso
+  product_uniqueness : {A B : Obj} (p q : Product A B) -> Σ (Mph (Product.P p) (Product.P q)) Iso
   product_uniqueness p q =
     let
       open Product p renaming (π₁ to p₁ ; π₂ to p₂ ; reduceCone to reduceCone-p ; proveId to proveId-p)

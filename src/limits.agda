@@ -11,7 +11,7 @@ open import pullbacks
 open import patterns
 
 module limits {k l : Level} (𝒞 : Category k l) where
-  open Category using (Obj ; Hom ; HomSet ; id)
+  open Category using (Obj ; Mph ; HomSet ; id)
   open Category 𝒞 using (_∘_ ; assocLR ; assocRL) renaming (id to idC ; left_id to l-id ; right_id to r-id)
 
   record Diagram {nj mj : Level} (J : Category nj mj) : Set (k ⊔ l ⊔ nj ⊔ mj) where
@@ -35,7 +35,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     open Cone c₁ renaming (C to C₁ ; τ to τ₁)
     open Cone c₂ renaming (C to C₂ ; τ to τ₂)
     field
-      u : Hom 𝒞 C₁ C₂
+      u : Mph 𝒞 C₁ C₂
       ev : {A : Obj J} -> τ₁ {A} ≡ τ₂ ∘ u
       
   record UniqueConeReduction {nj mj : Level} {J : Category nj mj} {D : Diagram J} (C₁ : Cone D) (C₂ : Cone D) : Set (l ⊔ nj) where
@@ -61,7 +61,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   discrete : {n : Level} -> Set n -> Category n n
   discrete {n} Obj = record
                        { Obj = Obj
-                       ; Hom = λ A B → A ≡ B
+                       ; Mph = λ A B → A ≡ B
                        ; id = refl
                        ; _∘_ = λ g f → f =>>= g
                        ; left_id = eqUnicity
@@ -98,7 +98,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   Δ-cone : {A : Obj 𝒞} {n : Level} {X : Set n} -> Cone (powerDiagram A X)
   Δ-cone {A} {n} {X} = record { C = A ; trans = record { τ = idC ; naturality = λ f -> l-id =>>= flipEq r-id } }
   
-  Δ : {A : Obj 𝒞} {n : Level} {X : Set n} -> (L : LimitOf (powerDiagram A X)) -> Hom 𝒞 A (LimitOf.C L)
+  Δ : {A : Obj 𝒞} {n : Level} {X : Set n} -> (L : LimitOf (powerDiagram A X)) -> Mph 𝒞 A (LimitOf.C L)
   Δ {A} {n} {X} L = UniqueConeReduction.u (LimitOf.universal L Δ-cone)
 
   pᵢΔ=id : {A : Obj 𝒞} {n : Level} {I : Set n} {i : I} {L : LimitOf (powerDiagram A I)} -> (LimitOf.τ L {i}) ∘ (Δ L) ≡ idC
@@ -110,7 +110,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   Δ-is-mono {A} {n} {X} x L = mono λ {Z g h} Δg=Δh → 
     let
       open LimitOf L renaming (C to P ; τ to p)
-      pₓ : Hom 𝒞 P A
+      pₓ : Mph 𝒞 P A
       pₓ = p {x}
       pₓΔ=id : (pₓ ∘ (Δ L)) ≡ idC
       pₓΔ=id = pᵢΔ=id {L = L}
@@ -118,7 +118,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
       id∘g=id∘h = ((_∘ g) $= (flipEq pₓΔ=id)) =>>= pₓΔg=pₓΔh =>>= ((_∘ h) $= pₓΔ=id)
     in (flipEq l-id) =>>= id∘g=id∘h =>>= l-id
 
-  equal-under-projections : {A : Obj 𝒞} {n : Level} {X : Set n} {D : Diagram (discrete X)} (L : LimitOf D) {f g : Hom 𝒞 A (LimitOf.C L)} ->
+  equal-under-projections : {A : Obj 𝒞} {n : Level} {X : Set n} {D : Diagram (discrete X)} (L : LimitOf D) {f g : Mph 𝒞 A (LimitOf.C L)} ->
                             ((x : X) -> (LimitOf.τ L {x}) ∘ f ≡ (LimitOf.τ L {x}) ∘ g) -> f ≡ g
   equal-under-projections {A} {_} {X} {D} L {f} {g} pf=pg =
     let
@@ -153,7 +153,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     open LimitOf L renaming (C to P ; τ to p)
     pa = p {inl A}
     pb = p {inr B}
-    universality : {X : Obj 𝒞} (x₁ : Hom 𝒞 X A) (x₂ : Hom 𝒞 X B) → UniqueSpanReduction 𝒞 x₁ x₂ pa pb
+    universality : {X : Obj 𝒞} (x₁ : Mph 𝒞 X A) (x₂ : Mph 𝒞 X B) → UniqueSpanReduction 𝒞 x₁ x₂ pa pb
     universality {X} x₁ x₂ = record
       { reduction = record
           { u = u
@@ -187,7 +187,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     -- Given arbitrary products
     ({l : Level} {X : Set l} (D : Diagram (discrete X)) -> LimitOf D) ->
     -- and binary pullbacks,
-    ({A B C : Obj 𝒞} (f : Hom 𝒞 A C) (g : Hom 𝒞 B C) -> PullbackOf 𝒞 f g) ->
+    ({A B C : Obj 𝒞} (f : Mph 𝒞 A C) (g : Mph 𝒞 B C) -> PullbackOf 𝒞 f g) ->
     -- for any diagram
     {k l : Level} {K : Category k l} -> (D : Diagram K) ->
     -- with at least two objects
@@ -203,33 +203,33 @@ module limits {k l : Level} (𝒞 : Category k l) where
     
     P' = prod (discreteDiagram D)
     open LimitOf P' renaming ( C to P ; cone to Pcone ; universal to Puniversal )
-    p : (a : Obj K) -> Hom 𝒞 P (DObj a)
+    p : (a : Obj K) -> Mph 𝒞 P (DObj a)
     p a = LimitOf.τ P' {a}
 
     M = HomSet K
     Pᴹdiagram = powerDiagram P M
     Pᴹ' = prod Pᴹdiagram
     open LimitOf Pᴹ' renaming ( C to Pᴹ ; cone to Pᴹcone ; universal to Pᴹuniversal )
-    q' : M -> Hom 𝒞 Pᴹ P
+    q' : M -> Mph 𝒞 Pᴹ P
     q' α = LimitOf.τ Pᴹ' {α}
-    q : {a c : Obj K} (α : Hom K a c) -> Hom 𝒞 Pᴹ P
+    q : {a c : Obj K} (α : Mph K a c) -> Mph 𝒞 Pᴹ P
     q {a} {c} α = q' (a , c , α)
 
     -- If two morphisms into Pᴹ behave equally under projections q and p, they are equal.
-    equal-under-q-p : {X : Obj 𝒞} {f g : Hom 𝒞 X Pᴹ} ->
-                      ({a c : Obj K} (α : Hom K a c) (b : Obj K) -> p b ∘ (q α ∘ f) ≡ p b ∘ (q α ∘ g)) ->
+    equal-under-q-p : {X : Obj 𝒞} {f g : Mph 𝒞 X Pᴹ} ->
+                      ({a c : Obj K} (α : Mph K a c) (b : Obj K) -> p b ∘ (q α ∘ f) ≡ p b ∘ (q α ∘ g)) ->
                       f ≡ g
     equal-under-q-p {_} {f} {g} pqf=pqg = equal-under-projections Pᴹ' qf=qg where
       qf=qg : (α : M) -> q' α ∘ f ≡ q' α ∘ g
       qf=qg (a , c , α) = equal-under-projections P' (pqf=pqg α)
 
     -- define morphism m by how it behaves under projections q and p
-    pqm : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> Hom 𝒞 P (DObj b)
+    pqm : {a c : Obj K} (α : Mph K a c) (b : Obj K) -> Mph 𝒞 P (DObj b)
     pqm {a} {c} α b with cmp c b
     ...                | inj₁ c=b rewrite c=b = DArr(α) ∘ (p a)
     ...                | inj₂ c≠b             = p b
     
-    Dspan : {a c : Obj K} -> Hom K a c -> Cone (discreteDiagram D)
+    Dspan : {a c : Obj K} -> Mph K a c -> Cone (discreteDiagram D)
     Dspan α = coneFrom P by (natTrans (pqm α _) witnessedBy λ { refl → r-id =>>= (flipEq l-id) })
 
     Pᴹspan : Cone Pᴹdiagram
@@ -239,7 +239,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
 
     open UniqueConeReduction (Pᴹuniversal Pᴹspan) renaming (u to m ; ev to qm=q∘m)
 
-    pqm=p∘q∘m : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> (pqm α b) ≡ (p b ∘ q α) ∘ m
+    pqm=p∘q∘m : {a c : Obj K} (α : Mph K a c) (b : Obj K) -> (pqm α b) ≡ (p b ∘ q α) ∘ m
     pqm=p∘q∘m {a} {c} α b = pqmαb=pb∘qmα =>>= pb∘qmα=pb∘qα∘m where
       open UniqueConeReduction (Puniversal (Dspan α)) renaming (u to qmα ; ev to pqmα=p∘qmα)
       pqmαb=pb∘qmα : pqm α b ≡ p b ∘ qmα
@@ -247,26 +247,26 @@ module limits {k l : Level} (𝒞 : Category k l) where
       pb∘qmα=pb∘qα∘m : p b ∘ qmα ≡ (p b ∘ q α) ∘ m
       pb∘qmα=pb∘qα∘m = ((p b ∘_) $= qm=q∘m {a , c , α}) =>>= assocRL
 
-    pqm=Dp : {b a : Obj K} (α : Hom K a b) -> (p b ∘ q α) ∘ m ≡ DArr α ∘ p a
+    pqm=Dp : {b a : Obj K} (α : Mph K a b) -> (p b ∘ q α) ∘ m ≡ DArr α ∘ p a
     pqm=Dp {b} {a} α = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=Dα∘pa where
       pqmbα=Dα∘pa : pqm α b ≡ DArr α ∘ p a
       pqmbα=Dα∘pa with cmp b b
       ...            | inj₁ refl = refl
       ...            | inj₂ b≠b  = ⊥-elim (b≠b refl)
 
-    pqm=p : {b a c : Obj K} (α : Hom K a c) -> c ≢ b -> (p b ∘ q α) ∘ m ≡ p b
+    pqm=p : {b a c : Obj K} (α : Mph K a c) -> c ≢ b -> (p b ∘ q α) ∘ m ≡ p b
     pqm=p {b} {a} {c} α c≠b = flipEq (pqm=p∘q∘m α b) =>>= pqmbα=pb where
       pqmbα=pb : pqm α b ≡ p b
       pqmbα=pb with cmp c b
       ...         | inj₁ c=b = ⊥-elim (c≠b c=b)
       ...         | inj₂ c≠b = refl
 
-    ΔP : Hom 𝒞 P Pᴹ
+    ΔP : Mph 𝒞 P Pᴹ
     ΔP = Δ Pᴹ'
     mono-ΔP : Mono ΔP
     mono-ΔP = Δ-is-mono {P} {_} {M} (c₁ , c₁ , id K {c₁}) Pᴹ'
 
-    qΔ=id : {a c : Obj K} {α : Hom K a c} -> q α ∘ ΔP ≡ idC
+    qΔ=id : {a c : Obj K} {α : Mph K a c} -> q α ∘ ΔP ≡ idC
     qΔ=id = pᵢΔ=id {L = Pᴹ'}
 
     open PullbackOf (pb ΔP m) renaming (P to L ; f' to Δ' ; g' to m' ; commuting to Δm'=mΔ' ; universal to Luniversal)
@@ -275,7 +275,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     mono-Δ' = pullback_of_mono_is_mono' 𝒞 (pb ΔP m) mono-ΔP
 
     -- For any b, pick α : a -> c such that c ≠ b.
-    acα≠ : (b : Obj K) -> ∃[ a ] ∃[ c ] ((Hom K a c) × (c ≢ b))
+    acα≠ : (b : Obj K) -> ∃[ a ] ∃[ c ] ((Mph K a c) × (c ≢ b))
     acα≠ b with cmp c₁ b
     ...       | inj₁ refl = (c₂ , c₂ , id K {c₂} , c₂≠c₁)
     ...       | inj₂ c₁≠b = (c₁ , c₁ , id K {c₁} , c₁≠b )
@@ -294,10 +294,10 @@ module limits {k l : Level} (𝒞 : Category k l) where
     m'=Δ' : m' ≡ Δ'
     m'=Δ' = equal-under-projections P' pm'=pΔ'
 
-    g : (a : Obj K) -> Hom 𝒞 L (DObj a)
+    g : (a : Obj K) -> Mph 𝒞 L (DObj a)
     g a = p a ∘ Δ'
 
-    Dg=g : {a b : Obj K} (α : Hom K a b) -> (DArr α) ∘ g a ≡ g b
+    Dg=g : {a b : Obj K} (α : Mph K a b) -> (DArr α) ∘ g a ≡ g b
     Dg=g {a} {b} α = Dαga=DαpaΔ' =>>= DαpaΔ'=pbqαmΔ' =>>= pbqαmΔ'=pbqαΔm' =>>= pbqαΔm'=pbm' =>>= pbm'=gb
       where
         Dαga=DαpaΔ'     : (DArr α) ∘ g a ≡ (DArr α ∘ p a) ∘ Δ'
@@ -320,10 +320,10 @@ module limits {k l : Level} (𝒞 : Category k l) where
 
       Δf'=mf' : ΔP ∘ f' ≡ m ∘ f'
       Δf'=mf' = equal-under-q-p pqΔf'=pqmf' where
-        pqΔf'=f : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> (p b ∘ q α) ∘ (ΔP ∘ f') ≡ f {b}
+        pqΔf'=f : {a c : Obj K} (α : Mph K a c) (b : Obj K) -> (p b ∘ q α) ∘ (ΔP ∘ f') ≡ f {b}
         pqΔf'=f α b = assocLR =>>= ((p b ∘_) $= (assocRL =>>= ((_∘ f') $= qΔ=id =>>= l-id)) =>>= (flipEq f=pf'))
         
-        pqmf'=f : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> (p b ∘ q α) ∘ (m ∘ f') ≡ f {b}
+        pqmf'=f : {a c : Obj K} (α : Mph K a c) (b : Obj K) -> (p b ∘ q α) ∘ (m ∘ f') ≡ f {b}
         pqmf'=f {a} {c} α b with cmp c b
         ...                    | inj₁ refl = pbqαmf'=Dαpaf' =>>= Dαpaf'=Dαfa =>>= Dαfa=fb where
                                    pbqαmf'=Dαpaf' = assocRL =>>= ((_∘ f') $= (pqm=Dp α))
@@ -331,7 +331,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
                                    Dαfa=fb = flipEq (f=Df α) =>>= r-id
         ...                    | inj₂ c≠b  = assocRL =>>= ((_∘ f') $= (pqm=p α c≠b)) =>>= flipEq f=pf'
 
-        pqΔf'=pqmf' : {a c : Obj K} (α : Hom K a c) (b : Obj K) -> p b ∘ (q α ∘ (ΔP ∘ f')) ≡ p b ∘ (q α ∘ (m ∘ f'))
+        pqΔf'=pqmf' : {a c : Obj K} (α : Mph K a c) (b : Obj K) -> p b ∘ (q α ∘ (ΔP ∘ f')) ≡ p b ∘ (q α ∘ (m ∘ f'))
         pqΔf'=pqmf' {a} {c} α b = assocRL =>>= (pqΔf'=f α b) =>>= flipEq (pqmf'=f α b) =>>= assocLR
 
       f'Cone : CommutingSquare 𝒞 f' ΔP f' m
@@ -361,7 +361,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     -- Given arbitrary products
     ({l : Level} {X : Set l} (D : Diagram (discrete X)) -> LimitOf D) ->
     -- and binary equalizers,
-    ({A B : Obj 𝒞} (f g : Hom 𝒞 A B) -> EqualizerOf 𝒞 f g) ->
+    ({A B : Obj 𝒞} (f g : Mph 𝒞 A B) -> EqualizerOf 𝒞 f g) ->
     -- for any diagram
     {k l : Level} {K : Category k l} -> (D : Diagram K) ->
     -- with at least two objects
@@ -373,7 +373,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   limits-from-products-and-equalizers prod equ {K = K} D c₁ c₂ c₂≠c₁ cmp =
     limits-from-products-and-pullbacks prod pb D c₁ c₂ c₂≠c₁ cmp
    where
-     pb : {A B C : Obj 𝒞} (f : Hom 𝒞 A C) (g : Hom 𝒞 B C) -> PullbackOf 𝒞 f g
+     pb : {A B C : Obj 𝒞} (f : Mph 𝒞 A C) (g : Mph 𝒞 B C) -> PullbackOf 𝒞 f g
      pb f g = pullbacks_from_products_and_equalizers 𝒞 binProd equ f g where
        binProd : (A B : Obj 𝒞) -> Product 𝒞 A B
        binProd A B = binaryProductFromLimit (prod (binaryProductDiagram A B))

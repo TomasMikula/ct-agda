@@ -10,28 +10,28 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
   open import morphisms 𝒞
   open import equalizers 𝒞
 
-  record ExtremalMono {A B : Obj} (m : Hom A B) : Set (k ⊔ l) where
+  record ExtremalMono {A B : Obj} (m : Mph A B) : Set (k ⊔ l) where
     constructor isMonic_andExtremal_
     field
       monic : Mono m
-      extremal : {X : Obj} (f : Hom X B) (e : Hom A X) -> m ≡ f ∘ e -> Epi e -> Iso e
+      extremal : {X : Obj} (f : Mph X B) (e : Mph A X) -> m ≡ f ∘ e -> Epi e -> Iso e
 
-  orthogonal : {A B C D : Obj} (f : Hom A B) (g : Hom C D) -> Set l
+  orthogonal : {A B C D : Obj} (f : Mph A B) (g : Mph C D) -> Set l
   orthogonal {A} {B} {C} {D} f g =
-    (u : Hom A C) (v : Hom B D) -> (v ∘ f) ≡ (g ∘ u) -> ∃[ w ] ((v ≡ g ∘ w) × (u ≡ w ∘ f))
+    (u : Mph A C) (v : Mph B D) -> (v ∘ f) ≡ (g ∘ u) -> ∃[ w ] ((v ≡ g ∘ w) × (u ≡ w ∘ f))
 
-  record StrongMono {A B : Obj} (m : Hom A B) : Set (k ⊔ l) where
+  record StrongMono {A B : Obj} (m : Mph A B) : Set (k ⊔ l) where
     constructor isMonic_andStrong_
     field
       monic : Mono m
-      strong : {C D : Obj} (e : Hom C D) -> Epi e -> orthogonal e m
+      strong : {C D : Obj} (e : Mph C D) -> Epi e -> orthogonal e m
 
-  record RegularMono {A B : Obj} (m : Hom A B) : Set (k ⊔ l) where
+  record RegularMono {A B : Obj} (m : Mph A B) : Set (k ⊔ l) where
     constructor regularMono
     field
       C : Obj
-      f : Hom B C
-      g : Hom B C
+      f : Mph B C
+      g : Mph B C
       equ : Equalizer f g m
 
     monic : Mono m
@@ -40,11 +40,11 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
   pattern equalizerOf_and_provedBy_ {C} f g equ = regularMono C f g equ
 
 
-  epi_extrermal_mono_is_iso : {A B : Obj} {f : Hom A B} -> Epi f -> ExtremalMono f -> Iso f
+  epi_extrermal_mono_is_iso : {A B : Obj} {f : Mph A B} -> Epi f -> ExtremalMono f -> Iso f
   epi_extrermal_mono_is_iso {f = f} epi-f ext-f = extremal id f (flipEq left_id) epi-f
     where open ExtremalMono ext-f
 
-  strong-mono-composition : {A B C : Obj} {f : Hom B C} {g : Hom A B} -> StrongMono f -> StrongMono g -> StrongMono (f ∘ g)
+  strong-mono-composition : {A B C : Obj} {f : Mph B C} {g : Mph A B} -> StrongMono f -> StrongMono g -> StrongMono (f ∘ g)
   strong-mono-composition {f = f} {g = g} sf sg =
     record { monic = mono_composition mono-f mono-g
            ; strong = strong }
@@ -52,7 +52,7 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
       open StrongMono sf renaming (monic to mono-f ; strong to strong-f)
       open StrongMono sg renaming (monic to mono-g ; strong to strong-g)
 
-      strong : {C D : Obj} (e : Hom C D) → Epi e → orthogonal e (f ∘ g)
+      strong : {C D : Obj} (e : Mph C D) → Epi e → orthogonal e (f ∘ g)
       strong e epi-e u v ve=fgu =
         case (strong-f e epi-e (g ∘ u) v (ve=fgu =>>= assocLR)) of
         λ { (w' , v=fw' , gu=w'e) →
@@ -60,7 +60,7 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
             λ { (w , w'=gw , u=we) → (w , v=fw' =>>= ((f ∘_) $= w'=gw) =>>= assocRL , u=we) }
           }
 
-  strong-mono-is-extremal : {A B : Obj} {m : Hom A B} -> StrongMono m -> ExtremalMono m
+  strong-mono-is-extremal : {A B : Obj} {m : Mph A B} -> StrongMono m -> ExtremalMono m
   strong-mono-is-extremal (isMonic mono-m andStrong strong-m) =
     isMonic mono-m
     andExtremal λ f e m=fe epi-e →
@@ -69,24 +69,24 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
         epi_section_is_iso epi-e (record { retraction = e⁻¹ ; evidence = flipEq id=e⁻¹e })
       }
 
-  extremal-mono-decomposition : {A B C : Obj} (f : Hom B C) (g : Hom A B) -> ExtremalMono (f ∘ g) -> ExtremalMono g
+  extremal-mono-decomposition : {A B C : Obj} (f : Mph B C) (g : Mph A B) -> ExtremalMono (f ∘ g) -> ExtremalMono g
   extremal-mono-decomposition f g (isMonic mono-fg andExtremal extremal-fg) =
     isMonic (mono-decomposition f g mono-fg)
     andExtremal λ h e g=he epi-e → extremal-fg (f ∘ h) e ((f ∘_) $= g=he =>>= assocRL) epi-e
 
-  strong-mono-decomposition : {A B C : Obj} (f : Hom B C) (g : Hom A B) -> StrongMono (f ∘ g) -> StrongMono g
+  strong-mono-decomposition : {A B C : Obj} (f : Mph B C) (g : Mph A B) -> StrongMono (f ∘ g) -> StrongMono g
   strong-mono-decomposition f g (isMonic mono-fg andStrong strong-fg) =
     isMonic mono-decomposition f g mono-fg
     andStrong λ e epi-e u v ve=gu →
       case (strong-fg e epi-e u (f ∘ v) (assocLR =>>= ((f ∘_) $= ve=gu) =>>= assocRL)) of
       λ { (w , fv=fgw , u=we) → (w , Epi.elimR epi-e (ve=gu =>>= ((g ∘_) $= u=we) =>>= assocRL) , u=we) }
 
-  regular-mono-is-strong : {A B : Obj} {m : Hom A B} -> RegularMono m -> StrongMono m
+  regular-mono-is-strong : {A B : Obj} {m : Mph A B} -> RegularMono m -> StrongMono m
   regular-mono-is-strong {m = m} rm@(equalizerOf α and β provedBy ((isEqualizing αm=βm) universally universality)) =
     isMonic mono-m andStrong strong-m where
       mono-m = RegularMono.monic rm
       elim-m = Mono.elimL mono-m
-      strong-m : {C D : Obj} (e : Hom C D) -> (Epi e) -> orthogonal e m
+      strong-m : {C D : Obj} (e : Mph C D) -> (Epi e) -> orthogonal e m
       strong-m e (epi elim-e) u v ve=mu = w-ev where
         αmu=βmu = assocRL =>>= ((_∘ u) $= αm=βm) =>>= assocLR
         αve=βve = assocLR =>>= ((α ∘_) $= ve=mu) =>>= αmu=βmu =>>= ((β ∘_) $= (flipEq ve=mu)) =>>= assocRL
@@ -97,8 +97,8 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
             }
 
   open import pushouts 𝒞
-  module WithPushouts (pushout : {A A₁ A₂ : Obj} (a₁ : Hom A A₁) (a₂ : Hom A A₂) -> PushoutOf a₁ a₂) where
-    extremal-mono-is-strong : {A B : Obj} {m : Hom A B} -> ExtremalMono m -> StrongMono m
+  module WithPushouts (pushout : {A A₁ A₂ : Obj} (a₁ : Mph A A₁) (a₂ : Mph A A₂) -> PushoutOf a₁ a₂) where
+    extremal-mono-is-strong : {A B : Obj} {m : Mph A B} -> ExtremalMono m -> StrongMono m
     extremal-mono-is-strong {m = m} (isMonic mono-m @ (mono elim-m) andExtremal extremal-m) =
       isMonic mono-m
       andStrong λ e epi-e u v ve=mu → case pushout e u of λ { (pushoutData _ e' u' po@(isPushout e'u=u'e univ)) →
@@ -115,22 +115,22 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
         }
       }
 
-    extremal-mono-composition : {A B C : Obj} {f : Hom B C} {g : Hom A B} -> ExtremalMono f -> ExtremalMono g -> ExtremalMono (f ∘ g)
+    extremal-mono-composition : {A B C : Obj} {f : Mph B C} {g : Mph A B} -> ExtremalMono f -> ExtremalMono g -> ExtremalMono (f ∘ g)
     extremal-mono-composition ext-f ext-g =
       strong-mono-is-extremal (strong-mono-composition (extremal-mono-is-strong ext-f) (extremal-mono-is-strong ext-g))
 
     open import pullbacks 𝒞
-    pulled-extremal-mono-is-extremal : {A B C : Obj} {m : Hom A C} {f : Hom B C}
-                                       {P : Obj} {m' : Hom P B} {f' : Hom P A} ->
+    pulled-extremal-mono-is-extremal : {A B C : Obj} {m : Mph A C} {f : Mph B C}
+                                       {P : Obj} {m' : Mph P B} {f' : Mph P A} ->
                                        Pullback m f m' f' -> ExtremalMono m -> ExtremalMono m'
     pulled-extremal-mono-is-extremal {A} {B} {C} {m} {f} {P} {m'} {f'} (pb @ (isPullback mf'=fm' univ-pb)) (isMonic mono-m andExtremal ext-m) =
       isMonic mono-m'
       andExtremal extremal-m'
         where
-          rm-id : {D E F X : Obj} {r : Hom X E} {s : Hom E X} -> r ∘ s ≡ id -> (p : Hom E F) (q : Hom D E) -> (p ∘ r) ∘ (s ∘ q) ≡ p ∘ q
+          rm-id : {D E F X : Obj} {r : Mph X E} {s : Mph E X} -> r ∘ s ≡ id -> (p : Mph E F) (q : Mph D E) -> (p ∘ r) ∘ (s ∘ q) ≡ p ∘ q
           rm-id rs=id p q = assocRL =>>= ((_∘ q) $= (assocLR =>>= ((p ∘_) $= rs=id) =>>= right_id))
           mono-m' = pullback_of_mono_is_mono pb mono-m
-          extremal-m' : {X : Obj} (h' : Hom X B) (e' : Hom P X) -> m' ≡ h' ∘ e' -> Epi e' -> Iso e'
+          extremal-m' : {X : Obj} (h' : Mph X B) (e' : Mph P X) -> m' ≡ h' ∘ e' -> Epi e' -> Iso e'
           extremal-m' h' e' m'=h'e' epi-e' with pushout e' f'
           ... | pushoutData _ e f'' po@(isPushout ef'=f''e' univ-po) with pushout_of_epi_is_epi po epi-e'
           ... | epi-e with mf'=fm' =>>= ((f ∘_) $= m'=h'e') =>>= assocRL
@@ -143,14 +143,14 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
             βe'=id = elim-m' (assocRL =>>= ((_∘ e') $= m'β=h') =>>= (flipEq m'=h'e') =>>= (flipEq right_id))
             e'β=id = elim-e' (assocLR =>>= ((e' ∘_) $= βe'=id) =>>= right_id =>>= flipEq left_id)
 
-    pulled-strong-mono-is-strong : {A B C : Obj} {m : Hom A C} {f : Hom B C}
-                                   {P : Obj} {m' : Hom P B} {f' : Hom P A} ->
+    pulled-strong-mono-is-strong : {A B C : Obj} {m : Mph A C} {f : Mph B C}
+                                   {P : Obj} {m' : Mph P B} {f' : Mph P A} ->
                                    Pullback m f m' f' -> StrongMono m -> StrongMono m'
     pulled-strong-mono-is-strong pb strong-m =
       extremal-mono-is-strong (pulled-extremal-mono-is-extremal pb (strong-mono-is-extremal strong-m))
 
-    pulled-regular-mono-is-regular : {A B C : Obj} {m : Hom A C} {f : Hom B C}
-                                     {P : Obj} {m' : Hom P B} {f' : Hom P A} ->
+    pulled-regular-mono-is-regular : {A B C : Obj} {m : Mph A C} {f : Mph B C}
+                                     {P : Obj} {m' : Mph P B} {f' : Mph P A} ->
                                      Pullback m f m' f' -> RegularMono m -> RegularMono m'
     pulled-regular-mono-is-regular {A} {B} {C} {m} {f} {P} {m'} {f'}
                                    pb@(isPullback mf'=fm' univ-pb)
@@ -160,7 +160,7 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
 
         αfm'=βfm' = assocLR =>>= ((α ∘_) $= flipEq mf'=fm') =>>= assocRL =>>= ((_∘ f') $= αm=βm) =>>= assocLR =>>= ((β ∘_) $= mf'=fm') =>>= assocRL
 
-        univ-m' : {F : Obj} {φ : Hom F B} → Equalizing (α ∘ f) (β ∘ f) φ → UniqueMorphismReduction φ m'
+        univ-m' : {F : Obj} {φ : Mph F B} → Equalizing (α ∘ f) (β ∘ f) φ → UniqueMorphismReduction φ m'
         univ-m' {F} {φ} (isEqualizing αfφ=βfφ) with univ-m (isEqualizing (assocRL =>>= αfφ=βfφ =>>= assocLR))
         ... | (reduceMorphismBy ψ witnessedBy mψ=fφ) uniquely uniq-ψ with univ-pb (commutingSquare mψ=fφ)
         ... | (reduceSpanBy χ witnessedBy f'χ=ψ and m'χ=φ) uniquely uniq-χ =

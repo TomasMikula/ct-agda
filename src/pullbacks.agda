@@ -9,16 +9,16 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   open import patterns 𝒞
   open import products 𝒞
 
-  record Pullback {P A B C : Obj} (f : Hom A C) (g : Hom B C) (f' : Hom P B) (g' : Hom P A) : Set (m ⊔ n) where
+  record Pullback {P A B C : Obj} (f : Mph A C) (g : Mph B C) (f' : Mph P B) (g' : Mph P A) : Set (m ⊔ n) where
     constructor isPullback
     field
       commuting : f ∘ g' ≡ g ∘ f'
-      universal : {Q : Obj} {f'' : Hom Q B} {g'' : Hom Q A} (sq : CommutingSquare g'' f f'' g) -> UniqueSpanReduction g'' f'' g' f'
+      universal : {Q : Obj} {f'' : Mph Q B} {g'' : Mph Q A} (sq : CommutingSquare g'' f f'' g) -> UniqueSpanReduction g'' f'' g' f'
 
     square : CommutingSquare g' f f' g
     square = commutingSquare commuting
 
-    reduceCone : {Q : Obj} {f'' : Hom Q B} {g'' : Hom Q A} (sq : CommutingSquare g'' f f'' g) -> SpanReduction g'' f'' g' f'
+    reduceCone : {Q : Obj} {f'' : Mph Q B} {g'' : Mph Q A} (sq : CommutingSquare g'' f f'' g) -> SpanReduction g'' f'' g' f'
     reduceCone sq = UniqueSpanReduction.reduction (universal sq)
 
     proveId : (red : SpanReduction g' f' g' f') -> SpanReduction.u red ≡ id
@@ -28,21 +28,21 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
         id=u = unique (identitySpanReduction g' f')
         red=u = unique red
 
-  record PullbackOf {C A B : Obj} (f : Hom A C) (g : Hom B C) : Set (n ⊔ m) where
+  record PullbackOf {C A B : Obj} (f : Mph A C) (g : Mph B C) : Set (n ⊔ m) where
     constructor pullbackData
     field
       P : Obj
-      f' : Hom P B
-      g' : Hom P A
+      f' : Mph P B
+      g' : Mph P A
       pullback : Pullback f g f' g'
 
     open Pullback pullback public
 
 
-  pullback_uniqueness : {C A B : Obj} {f : Hom A C} {g : Hom B C}
-                        {P₁ : Obj} {f₁ : Hom P₁ B} {g₁ : Hom P₁ A} (p₁ : Pullback f g f₁ g₁)
-                        {P₂ : Obj} {f₂ : Hom P₂ B} {g₂ : Hom P₂ A} (p₂ : Pullback f g f₂ g₂) ->
-                        Σ[ u ∈ (Hom P₁ P₂) ] Iso u
+  pullback_uniqueness : {C A B : Obj} {f : Mph A C} {g : Mph B C}
+                        {P₁ : Obj} {f₁ : Mph P₁ B} {g₁ : Mph P₁ A} (p₁ : Pullback f g f₁ g₁)
+                        {P₂ : Obj} {f₂ : Mph P₂ B} {g₂ : Mph P₂ A} (p₂ : Pullback f g f₂ g₂) ->
+                        Σ[ u ∈ (Mph P₁ P₂) ] Iso u
   pullback_uniqueness {f₁ = f₁} {g₁} p1 {f₂ = f₂} {g₂} p2 =
     let
       open Pullback p1 renaming (square to sq1 ; reduceCone to reduce1 ; proveId to proveId1)
@@ -62,13 +62,13 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
                ; rightInverse = proveId2 (composeSpanReductions r12 r21)
                }
 
-  pullback_uniqueness' : {C A B : Obj} {f : Hom A C} {g : Hom B C}
+  pullback_uniqueness' : {C A B : Obj} {f : Mph A C} {g : Mph B C}
                          (p₁ : PullbackOf f g) (p₂ : PullbackOf f g) ->
-                         Σ[ u ∈ (Hom (PullbackOf.P p₁) (PullbackOf.P p₂)) ] Iso u
+                         Σ[ u ∈ (Mph (PullbackOf.P p₁) (PullbackOf.P p₂)) ] Iso u
   pullback_uniqueness' (pullbackData _ _ _ p₁) (pullbackData _ _ _ p₂) = pullback_uniqueness p₁ p₂
                
-  pullback_of_mono_is_mono : {A B C : Obj} {f : Hom A C} {g : Hom B C}
-                             {P : Obj} {f' : Hom P B} {g' : Hom P A} ->
+  pullback_of_mono_is_mono : {A B C : Obj} {f : Mph A C} {g : Mph B C}
+                             {P : Obj} {f' : Mph P B} {g' : Mph P A} ->
                              Pullback f g f' g' -> Mono f -> Mono f'
   pullback_of_mono_is_mono {f = f} {g = g} {f' = f'} {g' = g'} p m =
     let
@@ -93,7 +93,7 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
         βu = unique βr
       in αu =>>= flipEq βu
 
-  pullback_of_mono_is_mono' : {A B C : Obj} {f : Hom A C} {g : Hom B C} -> (p : PullbackOf f g) -> Mono f -> Mono (PullbackOf.f' p)
+  pullback_of_mono_is_mono' : {A B C : Obj} {f : Mph A C} {g : Mph B C} -> (p : PullbackOf f g) -> Mono f -> Mono (PullbackOf.f' p)
   pullback_of_mono_is_mono' (pullbackData _ _ _ p) = pullback_of_mono_is_mono p
 
   --
@@ -103,7 +103,7 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   --   |  ↓   ↓   ↓
   --   ╰> D → E → F
   --
-  pullback_pasting : {A B C D E F : Obj} {ab : Hom A B} {bc : Hom B C} {ad : Hom A D} {be : Hom B E} {cf : Hom C F} {de : Hom D E} {ef : Hom E F} ->
+  pullback_pasting : {A B C D E F : Obj} {ab : Mph A B} {bc : Mph B C} {ad : Mph A D} {be : Mph B E} {cf : Mph C F} {de : Mph D E} {ef : Mph E F} ->
                      Pullback cf ef be bc -> Pullback be de ad ab -> Pullback cf (ef ∘ de) ad (bc ∘ ab)
   pullback_pasting {A} {B} {C} {D} {E} {F} {ab} {bc} {ad} {be} {cf} {de} {ef} p1 p2 =
     let
@@ -163,8 +163,8 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
   -- Construction of pullbacks from products and equalizers
   pullbacks_from_products_and_equalizers :
     ((A B : Obj) -> Product A B) ->
-    ({A B : Obj} -> (f g : Hom A B) -> EqualizerOf f g) ->
-    {A₁ A₂ C : Obj} -> (f : Hom A₁ C) -> (g : Hom A₂ C) -> PullbackOf f g
+    ({A B : Obj} -> (f g : Mph A B) -> EqualizerOf f g) ->
+    {A₁ A₂ C : Obj} -> (f : Mph A₁ C) -> (g : Mph A₂ C) -> PullbackOf f g
   pullbacks_from_products_and_equalizers prod equ {A₁} {A₂} {C} f g =
     let
       open Product (prod A₁ A₂) renaming (P to A₁xA₂ ; universal to prodUniversal)

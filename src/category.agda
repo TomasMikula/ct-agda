@@ -6,29 +6,29 @@ record Category (n m : Level) : Set (lsuc (n ⊔ m)) where
   constructor category
   field
     Obj : Set n
-    Hom : (A B : Obj) -> Set m
+    Mph : (A B : Obj) -> Set m
     
-    id : {A : Obj} -> Hom A A
-    _∘_  : {A B C : Obj} -> (Hom B C) -> (Hom A B) -> (Hom A C)
+    id : {A : Obj} -> Mph A A
+    _∘_  : {A B C : Obj} -> (Mph B C) -> (Mph A B) -> (Mph A C)
     
-    left_id  : {A B : Obj} {f : Hom A B} -> (id ∘ f ≡ f)
-    right_id : {A B : Obj} {f : Hom A B} -> (f ∘ id ≡ f)
-    assoc : {A B C D : Obj} {f : Hom C D} {g : Hom B C} {h : Hom A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
+    left_id  : {A B : Obj} {f : Mph A B} -> (id ∘ f ≡ f)
+    right_id : {A B : Obj} {f : Mph A B} -> (f ∘ id ≡ f)
+    assoc : {A B C D : Obj} {f : Mph C D} {g : Mph B C} {h : Mph A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
 
-  HomSet = Σ Obj (λ A -> Σ Obj (λ B -> Hom A B))
+  HomSet = Σ Obj (λ A -> Σ Obj (λ B -> Mph A B))
 
-  _>>_ : {A B C : Obj} -> (Hom A B) -> (Hom B C) -> (Hom A C)
+  _>>_ : {A B C : Obj} -> (Mph A B) -> (Mph B C) -> (Mph A C)
   f >> g  = g ∘ f
 
   assocLR = assoc
-  assocRL : {A B C D : Obj} {f : Hom C D} {g : Hom B C} {h : Hom A B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
+  assocRL : {A B C D : Obj} {f : Mph C D} {g : Mph B C} {h : Mph A B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
   assocRL = flipEq assoc
 
 -- Opposite category.
 op : {n m : Level} -> Category n m -> Category n m
 op 𝒞 = record
          { Obj = Obj
-         ; Hom = λ A B → Hom B A
+         ; Mph = λ A B → Mph B A
          ; id = id
          ; _∘_ = λ f g → g ∘ f
          ; left_id = right_id
@@ -51,13 +51,13 @@ op-involution {𝒞 = 𝒞} = op-op-𝒞=𝒞 where
     where ex' = extensionality'
 
   op-op-𝒞=𝒞 : op (op 𝒞) ≡ 𝒞
-  op-op-𝒞=𝒞 = (λ (a : {A B C D : Obj 𝒞} {f : Hom 𝒞 C D} {g : Hom 𝒞 B C} {h : Hom 𝒞 A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)) -> category (Obj 𝒞) (Hom 𝒞) (id 𝒞) (_∘_) (left_id 𝒞) (right_id 𝒞) a) $= op-op-assoc=assoc
+  op-op-𝒞=𝒞 = (λ (a : {A B C D : Obj 𝒞} {f : Mph 𝒞 C D} {g : Mph 𝒞 B C} {h : Mph 𝒞 A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)) -> category (Obj 𝒞) (Mph 𝒞) (id 𝒞) (_∘_) (left_id 𝒞) (right_id 𝒞) a) $= op-op-assoc=assoc
 
 -- Product of categories.
 _⨂_ : {nc mc nd md : Level} (𝒞 : Category nc mc) (𝒟 : Category nd md) -> Category (nc ⊔ nd) (mc ⊔ md)
 𝒞 ⨂ 𝒟 = category
   (Obj 𝒞 × Obj 𝒟)
-  (λ { (C₁ , D₁) (C₂ , D₂) → Hom 𝒞 C₁ C₂ × Hom 𝒟 D₁ D₂ })
+  (λ { (C₁ , D₁) (C₂ , D₂) → Mph 𝒞 C₁ C₂ × Mph 𝒟 D₁ D₂ })
   (id 𝒞 , id 𝒟)
   (λ { (f₁ , g₁) (f₂ , g₂) -> (f₁ 𝒞∘ f₂ , g₁ 𝒟∘ g₂) })
   (𝒞-l-id =,= 𝒟-l-id)
