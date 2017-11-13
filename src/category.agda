@@ -15,13 +15,15 @@ record Category (n m : Level) : Set (lsuc (n ⊔ m)) where
     right_id : {A B : Obj} {f : Mph A B} -> (f ∘ id ≡ f)
     assoc : {A B C D : Obj} {f : Mph C D} {g : Mph B C} {h : Mph A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
 
-  HomSet = Σ Obj (λ A -> Σ Obj (λ B -> Mph A B))
+  syntax Mph A B = A ~> B
 
-  _>>_ : {A B C : Obj} -> (Mph A B) -> (Mph B C) -> (Mph A C)
+  HomSet = ∃[ A ] ∃[ B ] (A ~> B)
+
+  _>>_ : {A B C : Obj} -> (A ~> B) -> (B ~> C) -> (A ~> C)
   f >> g  = g ∘ f
 
   assocLR = assoc
-  assocRL : {A B C D : Obj} {f : Mph C D} {g : Mph B C} {h : Mph A B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
+  assocRL : {A B C D : Obj} {f : C ~> D} {g : B ~> C} {h : A ~> B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
   assocRL = flipEq assoc
 
 -- Opposite category.

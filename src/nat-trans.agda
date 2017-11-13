@@ -15,6 +15,8 @@ record NatTrans {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
     τ : {A : Obj 𝒞} -> Mph 𝒟 (Fobj A) (Gobj A)
     naturality : {A B : Obj 𝒞} (f : Mph 𝒞 A B) -> τ ∘ (Farr f) ≡ (Garr f) ∘ τ
 
+syntax NatTrans F G = F ∸> G
+
 -- Composition of natural transformations.
 _⊙_ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H : Functor 𝒞 𝒟} ->
       NatTrans G H -> NatTrans F G -> NatTrans F H
@@ -61,3 +63,5 @@ record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
   rev-trans : NatTrans G F
   rev-trans with reverse
   ... | record { τ = ρ ; naturality = ρ-nat ; isomorphic = ρ-iso } = natTrans ρ witnessedBy ρ-nat
+
+syntax NatEquiv F G = F <∸> G

@@ -12,6 +12,8 @@ record Functor {n₁ m₁ n₂ m₂ : Level} (𝒞₁ : Category n₁ m₁) (�
     identity : {A : Obj₁} -> mapArr (id₁ {A}) ≡ id₂ {mapObj A}
     composition : {A B C : Obj₁} {g : Mph₁ B C} {f : Mph₁ A B} -> mapArr (g ∘₁ f) ≡ (mapArr g) ∘₂ (mapArr f)
 
+syntax Functor 𝒞 𝒟 = 𝒞 => 𝒟
+
 ConstFunctor : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} -> Category.Obj 𝒞₂ -> Functor 𝒞₁ 𝒞₂
 ConstFunctor {𝒞₂ = 𝒞₂} C = record
   { mapObj = λ x → C
