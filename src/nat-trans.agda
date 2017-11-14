@@ -18,6 +18,7 @@ record NatTrans {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
 syntax NatTrans F G = F ∸> G
 
 -- Composition of natural transformations.
+-- Unicode symbol U+2299.
 _⊙_ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H : Functor 𝒞 𝒟} ->
       NatTrans G H -> NatTrans F G -> NatTrans F H
 _⊙_ {𝒞 = 𝒞} {𝒟 = 𝒟} {F} {G} {H} (natTrans τ witnessedBy τ-naturality) (natTrans σ witnessedBy σ-naturality) =

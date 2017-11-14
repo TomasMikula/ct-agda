@@ -14,7 +14,7 @@ record Functor {n₁ m₁ n₂ m₂ : Level} (𝒞₁ : Category n₁ m₁) (�
 
 syntax Functor 𝒞 𝒟 = 𝒞 => 𝒟
 
-ConstFunctor : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} -> Category.Obj 𝒞₂ -> Functor 𝒞₁ 𝒞₂
+ConstFunctor : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} -> Category.Obj 𝒞₂ -> 𝒞₁ => 𝒞₂
 ConstFunctor {𝒞₂ = 𝒞₂} C = record
   { mapObj = λ x → C
   ; mapArr = λ f → id₂
@@ -24,3 +24,25 @@ ConstFunctor {𝒞₂ = 𝒞₂} C = record
   }
   where
     open Category 𝒞₂ renaming (id to id₂ ; left_id to left_id₂)
+
+Id : {n m : Level} (𝒞 : Category n m) -> 𝒞 => 𝒞
+Id 𝒞 = record
+  { mapObj = λ A → A
+  ; mapArr = λ f → f
+  ; identity = refl
+  ; composition = refl
+  }
+
+-- Functor composition.
+-- Unicode symbol U+229A.
+_⊚_ : {n₁ m₁ n₂ m₂ n₃ m₃ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {𝒞₃ : Category n₃ m₃} ->
+      (𝒞₂ => 𝒞₃) -> (𝒞₁ => 𝒞₂) -> (𝒞₁ => 𝒞₃)
+_⊚_ F G = record
+  { mapObj = λ A -> FObj (GObj A)
+  ; mapArr = λ f -> FArr (GArr f)
+  ; identity = (FArr $= G-id) =>>= F-id
+  ; composition = (FArr $= G-cmp) =>>= F-cmp
+  }
+ where
+  open Functor F renaming (mapObj to FObj ; mapArr to FArr ; identity to F-id ; composition to F-cmp)
+  open Functor G renaming (mapObj to GObj ; mapArr to GArr ; identity to G-id ; composition to G-cmp)
