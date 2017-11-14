@@ -2,6 +2,7 @@ open import Prelude
 open import category
 
 record Functor {n₁ m₁ n₂ m₂ : Level} (𝒞₁ : Category n₁ m₁) (𝒞₂ : Category n₂ m₂) : Set (n₁ ⊔ m₁ ⊔ n₂ ⊔ m₂) where
+  constructor functor
   open Category 𝒞₁ using () renaming (Obj to Obj₁ ; Mph to Mph₁ ; id to id₁ ; _∘_ to _∘₁_)
   open Category 𝒞₂ using () renaming (Obj to Obj₂ ; Mph to Mph₂ ; id to id₂ ; _∘_ to _∘₂_)
   field
