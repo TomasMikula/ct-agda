@@ -26,6 +26,19 @@ record Category (n m : Level) : Set (lsuc (n ⊔ m)) where
   assocRL : {A B C D : Obj} {f : C ~> D} {g : B ~> C} {h : A ~> B} -> f ∘ (g ∘ h) ≡ (f ∘ g) ∘ h
   assocRL = flipEq assoc
 
+  _=∘=_ : {A B C : Obj} {f₁ f₂ : B ~> C} {g₁ g₂ : A ~> B} -> f₁ ≡ f₂ -> g₁ ≡ g₂ -> f₁ ∘ g₁ ≡ f₂ ∘ g₂
+  refl =∘= refl = refl
+
+  _=∘_ : {A B C : Obj} {f₁ f₂ : B ~> C} -> f₁ ≡ f₂ -> (g : A ~> B) -> f₁ ∘ g ≡ f₂ ∘ g
+  refl =∘ _ = refl
+
+  _∘=_ : {A B C : Obj} (f : B ~> C) {g₁ g₂ : A ~> B} -> g₁ ≡ g₂ -> f ∘ g₁ ≡ f ∘ g₂
+  _ ∘= refl = refl
+
+  infixl 20 _=∘=_
+  infixl 20 _=∘_
+  infixl 20 _∘=_
+
 -- Opposite category.
 op : {n m : Level} -> Category n m -> Category n m
 op 𝒞 = record

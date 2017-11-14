@@ -36,7 +36,7 @@ refl =,= refl = refl
 infixl 20 _=$=_
 infixl 20 _$=_
 infixl 20 _=$_
-infixl 20 _=>>=_
+infixl 19 _=>>=_
 infixl 20 _~$~_
 infixl 20 _$~_
 infixl 20 _~$_
