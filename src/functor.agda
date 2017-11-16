@@ -48,7 +48,7 @@ _⊚_ : {n₁ m₁ n₂ m₂ n₃ m₃ : Level} {𝒞₁ : Category n₁ m₁} {
   ; composition = (Fm $= G-cmp) =>>= F-cmp
   }
 
--- Data needed to prove equality of functors.
+-- Data witnessing equality of functors.
 FunctorEqWitness : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂}
                    (F G : 𝒞₁ => 𝒞₂) -> Set (n₁ ⊔ n₂ ⊔ m₁ ⊔ m₂)
 FunctorEqWitness {𝒞₁ = 𝒞₁} {𝒞₂} (functor Fobj Fmph F-id F-cmp) (functor Gobj Gmph G-id G-cmp) =

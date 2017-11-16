@@ -1,4 +1,5 @@
 open import Data.Product
+open import Function using (case_of_)
 open import Prelude
 open import category
 open import functor
@@ -34,9 +35,44 @@ _⊙_ {𝒞 = 𝒞} {𝒟 = 𝒟} {F} {G} {H} (natTrans τ witnessedBy τ-natura
 
 -- Identity natural transformation.
 -- Unicode symbol U+1D7D9
-𝟙 : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F : 𝒞 => 𝒟) -> (F ∸> F)
-𝟙 {𝒟 = 𝒟} F = natTrans id witnessedBy λ f -> left_id =>>= (flipEq right_id) where
+𝟙 : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F : 𝒞 => 𝒟} -> (F ∸> F)
+𝟙 {𝒟 = 𝒟} {F} = natTrans id witnessedBy λ f -> left_id =>>= (flipEq right_id) where
   open Category 𝒟
+
+-- Data witnessing equality of natural transformations.
+NatTransEqWitness : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+                    (α β : F ∸> G) -> Set (nc ⊔ md)
+NatTransEqWitness {𝒞 = 𝒞} {𝒟} {functor F _ _ _} {functor G _ _ _}
+                  (natTrans α witnessedBy _) (natTrans β witnessedBy _) =
+  _≡_ {_} { {A : Obj 𝒞} -> Mph 𝒟 (F A) (G A) } α β where open Category
+
+-- Helper for proving equality of natural transformations.
+equalNatTrans : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+                {α β : F ∸> G} -> NatTransEqWitness α β -> α ≡ β
+equalNatTrans {𝒞 = 𝒞} {𝒟 = 𝒟} {functor _ F _ _} {functor _ G _ _}
+              {natTrans α witnessedBy α-nat} {natTrans .α witnessedBy β-nat} refl = res where
+  open Category hiding (_∘_)
+  open Category 𝒟 using (_∘_)
+
+  naturality-eq : _≡_ {_} { {A B : Obj 𝒞} (f : Mph 𝒞 A B) -> α ∘ (F f) ≡ (G f) ∘ α } α-nat β-nat
+  naturality-eq = extensionality' (extensionality' (extensionality λ f -> eqUnicity))
+  res = case naturality-eq of λ { refl -> refl }
+
+-- Associativity of composition of natural transformations.
+assoc-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H I : Functor 𝒞 𝒟}
+          {α : H ∸> I} {β : G ∸> H} {γ : F ∸> G} -> (α ⊙ β) ⊙ γ ≡ α ⊙ (β ⊙ γ)
+assoc-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' assoc) where open Category 𝒟 using (assoc)
+
+-- Left identity for composition of natural transformations.
+left-id-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+            {α : F ∸> G} -> 𝟙 ⊙ α ≡ α
+left-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' left_id) where open Category 𝒟 using (left_id)
+
+-- Right identity for composition of natural transformations.
+right-id-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+             {α : F ∸> G} -> α ⊙ 𝟙 ≡ α
+right-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' right_id) where open Category 𝒟 using (right_id)
+
 
 -- Composition of natural transformation and functor.
 _⊙>_ : {nb mb nc mc nd md : Level} {𝓑 : Category nb mb} {𝓒 : Category nc mc} {𝓓 : Category nd md} ->
