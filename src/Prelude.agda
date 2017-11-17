@@ -1,7 +1,10 @@
+{-# OPTIONS --rewriting #-}
+
 open import Agda.Primitive public
 open import Relation.Binary.Core public using (_≡_ ; _≢_ ; refl)
 open import Relation.Binary.HeterogeneousEquality public using (_≅_; refl ; ≅-to-≡)
 open import Data.Product
+open import Function using (_∘_)
 
  -- Equal functions applied to equal arguments yield equal results.
 _=$=_ : {n m : Level} {A : Set n} {B : Set m} {f g : A -> B} {a1 a2 : A} (p : f ≡ g) (q : a1 ≡ a2) -> (f a1) ≡ (g a2)
@@ -16,7 +19,7 @@ refl =$ a = refl
 
 -- Transitivity of equality.
 _=>>=_ : {n : Level} {A : Set n} {a b c : A} (p : a ≡ b) (q : b ≡ c) -> (a ≡ c)
-refl =>>= refl = refl
+refl =>>= q = q
 
 _~$~_ : {n m : Level} {A : Set n} {B : A -> Set m} {f g : (a : A) -> B a} {a1 a2 : A} (p : f ≅ g) (q : a1 ≅ a2) -> (f a1) ≅ (g a2)
 refl ~$~ refl = refl
@@ -57,15 +60,39 @@ eqUnicity {p = refl} {q = refl} = refl
 hetero : {l : Level} {A : Set l} {a b : A} -> a ≡ b -> a ≅ b
 hetero refl = refl
 
-open import Agda.Builtin.TrustMe
+assoc-=>>= : {a : Level} {A : Set a} {w x y z : A} {p : w ≡ x} {q : x ≡ y} {r : y ≡ z} ->
+             p =>>= (q =>>= r) ≡ (p =>>= q) =>>= r
+assoc-=>>= = eqUnicity
 
-extensionality : {k l : Level} {A : Set k} {B : A -> Set l} {f g : (a : A) -> B a} ->
-                 ((a : A) -> (f a) ≡ (g a)) -> f ≡ g
-extensionality ev = primTrustMe
+-- Note: Don't need the symmetric left identity rewrite rule, since that one is computational.
+r-id-=>>= : {a : Level} {A : Set a} {x y : A} {p : x ≡ y} -> p =>>= refl ≡ p
+r-id-=>>= = eqUnicity
+
+l-id-$= : {a : Level} {A : Set a} {x y : A} {p : x ≡ y} -> (λ x -> x) $= p ≡ p
+l-id-$= = eqUnicity
+
+distr-$=-=>>= : {a b : Level} {A : Set a} {B : Set b} {x y z : A} {f : A -> B} {p : x ≡ y} {q : y ≡ z} ->
+                f $= (p =>>= q) ≡ (f $= p) =>>= (f $= q)
+distr-$=-=>>= = eqUnicity
+
+join-$= : {a b c : Level} {A : Set a} {B : Set b} {C : Set c} {x y : A} {f : B -> C} {g : A -> B} {p : x ≡ y} ->
+          f $= (g $= p) ≡ (f ∘ g) $= p
+join-$= = eqUnicity
+
+{-# BUILTIN REWRITE _≡_ #-}
+{-# REWRITE r-id-=>>= #-}
+{-# REWRITE assoc-=>>= #-}
+{-# REWRITE l-id-$= #-}
+{-# REWRITE distr-$=-=>>= #-}
+{-# REWRITE join-$= #-}
+
+postulate
+  extensionality : {k l : Level} {A : Set k} {B : A -> Set l} {f g : (a : A) -> B a} ->
+                   ((a : A) -> (f a) ≡ (g a)) -> f ≡ g
 
 extensionality' : {k l : Level} {A : Set k} {B : A -> Set l} {f g : {a : A} -> B a} ->
-                 ({a : A} -> (f {a}) ≡ (g {a})) -> (λ {a} -> f {a}) ≡ (λ {a} -> g {a})
-extensionality' {f = f} {g = g} ev = (λ h -> λ {a} -> h a)  $= extensionality (λ a -> ev {a})
+                 ({a : A} -> (f {a}) ≡ (g {a})) -> (_≡_ {_} { {a : A} -> B a } f g)
+extensionality' {f = f} {g = g} ev = (λ h -> λ {a} -> h a) $= extensionality (λ a -> ev {a})
 
 data Singleton {ℓ : _} {A : Set ℓ} : A -> Set where
   just : (a : A) -> Singleton a
