@@ -14,8 +14,14 @@ refl =$= refl = refl
 _$=_ : {n m : Level} {A : Set n} {B : Set m} {a1 a2 : A} (f : A -> B) (q : a1 ≡ a2) -> (f a1) ≡ (f a2)
 f $= refl = refl
 
+_$'=_ : {n m : Level} {A : Set n} {B : Set m} {a1 a2 : A} (f : {a : A} -> B) (q : a1 ≡ a2) -> (f {a1}) ≡ (f {a2})
+f $'= refl = refl
+
 _=$_ : {n m : Level} {A : Set n} {B : A -> Set m} {f g : (a : A) -> B a} (p : f ≡ g) (a : A) -> (f a) ≡ (g a)
 refl =$ a = refl
+
+_=$'_ : {n m : Level} {A : Set n} {B : A -> Set m} {f g : {a : A} -> B a} (p : _≡_ {_} { {a : A} -> B a } f g) (a : A) -> (f {a}) ≡ (g {a})
+refl =$' a = refl
 
 -- Transitivity of equality.
 _=>>=_ : {n : Level} {A : Set n} {a b c : A} (p : a ≡ b) (q : b ≡ c) -> (a ≡ c)
@@ -39,6 +45,8 @@ refl =,= refl = refl
 infixl 20 _=$=_
 infixl 20 _$=_
 infixl 20 _=$_
+infixl 20 _$'=_
+infixl 20 _=$'_
 infixl 19 _=>>=_
 infixl 20 _~$~_
 infixl 20 _$~_
