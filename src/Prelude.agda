@@ -42,15 +42,20 @@ refl ~$' a = refl
 _=,=_ : {n m : Level} {A : Set n} {B : Set m} {a1 a2 : A} {b1 b2 : B} -> a1 ≡ a2 -> b1 ≡ b2 -> (a1 , b1) ≡ (a2 , b2)
 refl =,= refl = refl
 
-infixl 20 _=$=_
-infixl 20 _$=_
-infixl 20 _=$_
-infixl 20 _$'=_
-infixl 20 _=$'_
+-- QED. U+220E
+_∎ : {a : Level} {A : Set a} (x : A) -> x ≡ x
+x ∎ = refl
+
+_=[_]>_ : {a : Level} {A : Set a} (x : A) {y z : A} -> x ≡ y -> y ≡ z -> x ≡ z
+x =[ refl ]> q = q
+
+_<[_]=_ : {a : Level} {A : Set a} (x : A) {y z : A} -> y ≡ x -> y ≡ z -> x ≡ z
+x <[ refl ]= q = q
+
+infixl 20 _=$=_ _$=_ _=$_ _$'=_ _=$'_ _~$~_ _$~_ _~$_
 infixl 19 _=>>=_
-infixl 20 _~$~_
-infixl 20 _$~_
-infixl 20 _~$_
+infixr 1 _=[_]>_ _<[_]=_
+infixr 2 _∎
 
 -- Symmetry of equality.
 flipEq : {n : Level} {A : Set n} {a b : A} (p : a ≡ b) -> b ≡ a
