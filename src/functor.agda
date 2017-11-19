@@ -84,3 +84,43 @@ left-id-⊚ = equalFunctors (refl , refl)
 
 right-id-⊚ : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {F : 𝒞₁ => 𝒞₂} -> F ⊚ Id ≡ F
 right-id-⊚ = equalFunctors (refl , refl)
+
+-- `F [ A ,-]` is functor `F : 𝓐⨂𝓑 => 𝓒` (partially) applied to object A of 𝓐, resulting in a functor `𝓑 => 𝓒`.
+_[_,-] : ∀ {ka la kb lb kc lc} {𝓐 : Category ka la} {𝓑 : Category kb lb} {𝓒 : Category kc lc}
+         (F : (𝓐 ⨂ 𝓑) => 𝓒) (A : Obj 𝓐) -> (𝓑 => 𝓒)
+_[_,-] {𝓐 = 𝓐} {𝓑} {𝓒} (functor Fo Fm F-id F-cmp) A =
+  functor
+    (λ B → Fo (A , B))
+    (λ g → Fm (id 𝓐 {A} , g))
+    F-id
+    λ {B C D g h} ->
+      Fm (id 𝓐 {A} , g ∘𝓑 h)
+        <[ (λ >O< -> Fm (>O< , g ∘𝓑 h)) $= right_id 𝓐 ]=
+      Fm ((id 𝓐 {A}) ∘𝓐 (id 𝓐 {A}) , g ∘𝓑 h)
+        =[ F-cmp ]>
+      Fm (id 𝓐 {A}, g) ∘𝓒 (Fm (id 𝓐 {A}, h))
+    ∎
+  where
+    open Category 𝓐 using () renaming (_∘_ to _∘𝓐_)
+    open Category 𝓑 using () renaming (_∘_ to _∘𝓑_)
+    open Category 𝓒 using () renaming (_∘_ to _∘𝓒_)
+
+-- `F [-, B ]` is functor `F : 𝓐⨂𝓑 => 𝓒` (partially) applied to object B of 𝓑, resulting in a functor `𝓐 => 𝓒`.
+_[-,_] : ∀ {ka la kb lb kc lc} {𝓐 : Category ka la} {𝓑 : Category kb lb} {𝓒 : Category kc lc}
+         (F : (𝓐 ⨂ 𝓑) => 𝓒) (B : Obj 𝓑) -> (𝓐 => 𝓒)
+_[-,_] {𝓐 = 𝓐} {𝓑} {𝓒} (functor Fo Fm F-id F-cmp) B =
+  functor
+    (λ A → Fo (A , B))
+    (λ f → Fm (f , id 𝓑 {B}))
+    F-id
+    λ {A C D g h} ->
+      Fm (g ∘𝓐 h , id 𝓑 {B})
+        <[ (λ >O< -> Fm (g ∘𝓐 h , >O<)) $= left_id 𝓑 ]=
+      Fm (g ∘𝓐 h , (id 𝓑 {B}) ∘𝓑 (id 𝓑 {B}))
+        =[ F-cmp ]>
+      Fm (g , id 𝓑 {B}) ∘𝓒 Fm (h , id 𝓑 {B})
+    ∎
+  where
+    open Category 𝓐 using () renaming (_∘_ to _∘𝓐_)
+    open Category 𝓑 using () renaming (_∘_ to _∘𝓑_)
+    open Category 𝓒 using () renaming (_∘_ to _∘𝓒_)
