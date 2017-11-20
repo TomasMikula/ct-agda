@@ -9,7 +9,7 @@ SET l = record
   ; id = λ x → x
   ; _∘_ = λ f g x → f (g x)
 
-  ; left_id = λ {f} → refl
-  ; right_id = λ {f} → refl
+  ; left-id = λ {f} → refl
+  ; right-id = λ {f} → refl
   ; assoc = λ {f g h} → refl
   }

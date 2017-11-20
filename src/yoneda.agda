@@ -16,7 +16,7 @@ open Functor
 Y-trans : ∀ {k l} {𝒞 : Category k l} (F : (op 𝒞) => (SET l)) (B : Obj 𝒞) -> (mapObj F B) -> ((Hom 𝒞 [-, B ]) ∸> F)
 Y-trans {𝒞 = 𝒞} (functor Fo Fm F-id F-cmp) B b =
   natTrans (λ f -> Fm f b)
-  witnessedBy λ f -> extensionality λ g -> ((Fm $= left_id 𝒞) =>>= F-cmp) =$ b
+  witnessedBy λ f -> extensionality λ g -> ((Fm $= left-id 𝒞) =>>= F-cmp) =$ b
 
 -- Element of F(B) corresponding to a natural transformation from 𝒞(-, B) to F
 Y-elem : ∀ {k l} {𝒞 : Category k l} (F : (op 𝒞) => (SET l)) (B : Obj 𝒞) -> ((Hom 𝒞 [-, B ]) ∸> F) -> (mapObj F B)
@@ -33,9 +33,9 @@ Yoneda {𝒞 = 𝒞} F@(functor _ Fm F-id _) B =
         Fm f (α (id 𝒞))
           <[ α-nat f =$ id 𝒞 ]=
         α (id 𝒞 ∘𝒞 (id 𝒞 ∘𝒞 f))
-          =[ α $= left_id 𝒞 ]>
+          =[ α $= left-id 𝒞 ]>
         α (id 𝒞 ∘𝒞 f)
-          =[ α $= left_id 𝒞 ]>
+          =[ α $= left-id 𝒞 ]>
         α f
       ∎ ))
     })
@@ -48,8 +48,8 @@ Y-embed 𝒞 =
   functor
     (λ B -> Hom 𝒞 [-, B ])
     (λ {B} {A} g -> Y-trans (Hom 𝒞 [-, A ]) B g)
-    (equalNatTrans (extensionality' (extensionality λ f -> left_id 𝒞 =>>= left_id 𝒞)))
-    (equalNatTrans (extensionality' (extensionality λ f -> id 𝒞 ∘𝒞= (assoc 𝒞 =>>= (_ ∘𝒞= (flipEq (left_id 𝒞)))))))
+    (equalNatTrans (extensionality' (extensionality λ f -> left-id 𝒞 =>>= left-id 𝒞)))
+    (equalNatTrans (extensionality' (extensionality λ f -> id 𝒞 ∘𝒞= (assoc 𝒞 =>>= (_ ∘𝒞= (flipEq (left-id 𝒞)))))))
   where
     open Category 𝒞 using () renaming (_∘=_ to _∘𝒞=_)
 
@@ -90,9 +90,9 @@ Hom-to-F {𝒞 = 𝒞} F@(functor Fo Fm F-id F-cmp) =
       natTrans (λ g -> α (f ∘𝒞 g))
       witnessedBy λ g -> extensionality λ h ->
         α (f ∘𝒞 (id 𝒞 ∘𝒞 (h ∘𝒞 g)))
-          =[ α $= (f ∘𝒞= left_id 𝒞) ]>
+          =[ α $= (f ∘𝒞= left-id 𝒞) ]>
         α (f ∘𝒞 (h ∘𝒞 g))
-          <[ α $= left_id 𝒞 ]=
+          <[ α $= left-id 𝒞 ]=
         α (id 𝒞 ∘𝒞 (f ∘𝒞 (h ∘𝒞 g)))
           <[ α $= (id 𝒞 ∘𝒞= assoc 𝒞) ]=
         α (id 𝒞 ∘𝒞 ((f ∘𝒞 h) ∘𝒞 g))
@@ -101,7 +101,7 @@ Hom-to-F {𝒞 = 𝒞} F@(functor Fo Fm F-id F-cmp) =
       ∎
     })
     (extensionality λ { (natTrans α witnessedBy _) ->
-      equalNatTrans (extensionality' (extensionality λ f -> α $= left_id 𝒞)) })
+      equalNatTrans (extensionality' (extensionality λ f -> α $= left-id 𝒞)) })
     (extensionality λ { (natTrans α witnessedBy _) ->
       equalNatTrans (extensionality' (extensionality λ f -> α $= assoc 𝒞)) })
   where

@@ -41,8 +41,8 @@ homset-adjunction {𝒞 = 𝒞} {𝒟 = 𝒟} {L = L} {R = R} ε' @ (natEquiv ε
    open Functor L renaming (mapObj to Lo ; mapArr to Lm ; identity to L-id)
    open Functor R renaming (mapObj to Ro ; mapArr to Rm ; identity to R-id)
    open Category using (Obj ; Mph ; id ; assocRL ; assocLR)
-   open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; left_id to l-idC ; right_id to r-idC ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; _=∘=_ to _=∘𝒞=_)
-   open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; left_id to l-idD ; right_id to r-idD ; _∘=_ to  _∘𝒟=_)
+   open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; left-id to l-idC ; right-id to r-idC ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; _=∘=_ to _=∘𝒞=_)
+   open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; left-id to l-idD ; right-id to r-idD ; _∘=_ to  _∘𝒟=_)
    
    𝜆-nat : {Y Y' : Obj 𝒟} (g : Mph 𝒟 Y Y') → (ε⁻¹ (id 𝒞) ∘𝒟 Lm (Rm g)) ≡ (g ∘𝒟 ε⁻¹ (id 𝒞))
    𝜆-nat {Y} {Y'} g = flipEq l-idD =>>= ((flipEq (ε⁻¹-nat _) =$ _) =>>= (ε⁻¹ $= ((_∘𝒞 (id 𝒞 ∘𝒞 Rm g)) $= R-id =>>= l-idC =>>= l-idC =>>= (flipEq r-idC =>>= (Rm g ∘𝒞_) $= flipEq l-idC)))) =>>= (ε⁻¹-nat (id 𝒞 , g)) =$ (id 𝒞) =>>= assocRL 𝒟 =>>= (_ ∘𝒟= L-id) =>>= r-idD
@@ -79,6 +79,6 @@ unit-counit-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor _ Rm
   ; R𝜆⊙ρR=1 = R𝜆⊙ρR=1
   }
  where
-  open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; assoc to assocC ; assocRL to assocC' ; left_id to l-idC)
-  open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _=∘_ to _=∘𝒟_ ; _∘=_ to _∘𝒟=_ ; assoc to assocD ; assocRL to assocD' ; right_id to r-idD)
+  open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; assoc to assocC ; assocRL to assocC' ; left-id to l-idC)
+  open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _=∘_ to _=∘𝒟_ ; _∘=_ to _∘𝒟=_ ; assoc to assocD ; assocRL to assocD' ; right-id to r-idD)
 

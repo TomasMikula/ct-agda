@@ -11,8 +11,8 @@ record Category (n m : Level) : Set (lsuc (n ⊔ m)) where
     id : {A : Obj} -> Mph A A
     _∘_  : {A B C : Obj} -> (Mph B C) -> (Mph A B) -> (Mph A C)
     
-    left_id  : {A B : Obj} {f : Mph A B} -> (id ∘ f ≡ f)
-    right_id : {A B : Obj} {f : Mph A B} -> (f ∘ id ≡ f)
+    left-id  : {A B : Obj} {f : Mph A B} -> (id ∘ f ≡ f)
+    right-id : {A B : Obj} {f : Mph A B} -> (f ∘ id ≡ f)
     assoc : {A B C D : Obj} {f : Mph C D} {g : Mph B C} {h : Mph A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
 
   syntax Mph A B = A ~> B
@@ -46,8 +46,8 @@ op 𝒞 = record
          ; Mph = λ A B → Mph B A
          ; id = id
          ; _∘_ = λ f g → g ∘ f
-         ; left_id = right_id
-         ; right_id = left_id
+         ; left-id = right-id
+         ; right-id = left-id
          ; assoc = flipEq (assoc)
          }
        where
@@ -66,7 +66,7 @@ op-involution {𝒞 = 𝒞} = op-op-𝒞=𝒞 where
     where ex' = extensionality'
 
   op-op-𝒞=𝒞 : op (op 𝒞) ≡ 𝒞
-  op-op-𝒞=𝒞 = (λ (a : {A B C D : Obj 𝒞} {f : Mph 𝒞 C D} {g : Mph 𝒞 B C} {h : Mph 𝒞 A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)) -> category (Obj 𝒞) (Mph 𝒞) (id 𝒞) (_∘_) (left_id 𝒞) (right_id 𝒞) a) $= op-op-assoc=assoc
+  op-op-𝒞=𝒞 = (λ (a : {A B C D : Obj 𝒞} {f : Mph 𝒞 C D} {g : Mph 𝒞 B C} {h : Mph 𝒞 A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)) -> category (Obj 𝒞) (Mph 𝒞) (id 𝒞) (_∘_) (left-id 𝒞) (right-id 𝒞) a) $= op-op-assoc=assoc
 
 -- Product of categories.
 _⨂_ : {nc mc nd md : Level} (𝒞 : Category nc mc) (𝒟 : Category nd md) -> Category (nc ⊔ nd) (mc ⊔ md)
@@ -80,5 +80,5 @@ _⨂_ : {nc mc nd md : Level} (𝒞 : Category nc mc) (𝒟 : Category nd md) ->
   (𝒞-assoc =,= 𝒟-assoc)
  where
   open Category
-  open Category 𝒞 using () renaming (_∘_ to _𝒞∘_ ; left_id to 𝒞-l-id ; right_id to 𝒞-r-id ; assoc to 𝒞-assoc)
-  open Category 𝒟 using () renaming (_∘_ to _𝒟∘_ ; left_id to 𝒟-l-id ; right_id to 𝒟-r-id ; assoc to 𝒟-assoc)
+  open Category 𝒞 using () renaming (_∘_ to _𝒞∘_ ; left-id to 𝒞-l-id ; right-id to 𝒞-r-id ; assoc to 𝒞-assoc)
+  open Category 𝒟 using () renaming (_∘_ to _𝒟∘_ ; left-id to 𝒟-l-id ; right-id to 𝒟-r-id ; assoc to 𝒟-assoc)

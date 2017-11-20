@@ -12,7 +12,7 @@ open import patterns
 
 module limits {k l : Level} (𝒞 : Category k l) where
   open Category using (Obj ; Mph ; HomSet ; id)
-  open Category 𝒞 using (_∘_ ; assocLR ; assocRL) renaming (id to idC ; left_id to l-id ; right_id to r-id)
+  open Category 𝒞 using (_∘_ ; assocLR ; assocRL) renaming (id to idC ; left-id to l-id ; right-id to r-id)
 
   Diagram : {nj mj : Level} (J : Category nj mj) -> Set (k ⊔ l ⊔ nj ⊔ mj)
   Diagram J = Functor J 𝒞
@@ -59,8 +59,8 @@ module limits {k l : Level} (𝒞 : Category k l) where
                        ; Mph = λ A B → A ≡ B
                        ; id = refl
                        ; _∘_ = λ g f → f =>>= g
-                       ; left_id = eqUnicity
-                       ; right_id = eqUnicity
+                       ; left-id = eqUnicity
+                       ; right-id = eqUnicity
                        ; assoc = eqUnicity
                        }
 

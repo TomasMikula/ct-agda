@@ -36,7 +36,7 @@ _⊙_ {𝒞 = 𝒞} {𝒟 = 𝒟} {F} {G} {H} (natTrans τ witnessedBy τ-natura
 -- Identity natural transformation.
 -- Unicode symbol U+1D7D9
 𝟙 : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F : 𝒞 => 𝒟} -> (F ∸> F)
-𝟙 {𝒟 = 𝒟} {F} = natTrans id witnessedBy λ f -> left_id =>>= (flipEq right_id) where
+𝟙 {𝒟 = 𝒟} {F} = natTrans id witnessedBy λ f -> left-id =>>= (flipEq right-id) where
   open Category 𝒟
 
 -- Data witnessing equality of natural transformations.
@@ -66,12 +66,12 @@ assoc-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' assoc) where open Categ
 -- Left identity for composition of natural transformations.
 left-id-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
             {α : F ∸> G} -> 𝟙 ⊙ α ≡ α
-left-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' left_id) where open Category 𝒟 using (left_id)
+left-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' left-id) where open Category 𝒟 using (left-id)
 
 -- Right identity for composition of natural transformations.
 right-id-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
              {α : F ∸> G} -> α ⊙ 𝟙 ≡ α
-right-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' right_id) where open Category 𝒟 using (right_id)
+right-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' right-id) where open Category 𝒟 using (right-id)
 
 
 -- Composition of natural transformation and functor.
@@ -90,7 +90,7 @@ functor H HArr H-id H-cmp <⊙ (natTrans τ witnessedBy τ-nat) =
 record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F G : Functor 𝒞 𝒟) : Set (nc ⊔ mc ⊔ nd ⊔ md) where
   constructor natEquiv_witnessedBy_and_
   open Category using (Obj ; Mph)
-  open Category 𝒟 using (_∘_ ; assocLR ; assocRL ; left_id ; right_id)
+  open Category 𝒟 using (_∘_ ; assocLR ; assocRL ; left-id ; right-id)
   open Functor F renaming (mapObj to Fobj ; mapArr to Farr)
   open Functor G renaming (mapObj to Gobj ; mapArr to Garr)
   open morphisms 𝒟
@@ -111,7 +111,7 @@ record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
     rev-τ = Iso.inverse isomorphic
 
     rev-nat : {A B : Obj 𝒞} (f : Mph 𝒞 A B) → (rev-τ ∘ Garr f) ≡ (Farr f ∘ rev-τ)
-    rev-nat {A} {B} f = flipEq right_id =>>= (((rev-τ ∘ Garr f) ∘_) $= flipEq (Iso.rightInverse isomorphic)) =>>= assocRL =>>= ((_∘ rev-τ) $= (assocLR =>>= ((rev-τ ∘_) $= flipEq (naturality f)) =>>= assocRL =>>= ((_∘ Farr f) $= (Iso.leftInverse isomorphic)) =>>= left_id))
+    rev-nat {A} {B} f = flipEq right-id =>>= (((rev-τ ∘ Garr f) ∘_) $= flipEq (Iso.rightInverse isomorphic)) =>>= assocRL =>>= ((_∘ rev-τ) $= (assocLR =>>= ((rev-τ ∘_) $= flipEq (naturality f)) =>>= assocRL =>>= ((_∘ Farr f) $= (Iso.leftInverse isomorphic)) =>>= left-id))
 
   trans : NatTrans F G
   trans = natTrans τ witnessedBy naturality

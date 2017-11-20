@@ -24,10 +24,10 @@ ConstFunctor {𝒞₂ = 𝒞₂} C = record
   ; mapArr = λ f → id₂
   
   ; identity = refl
-  ; composition = flipEq left_id₂
+  ; composition = flipEq left-id₂
   }
   where
-    open Category 𝒞₂ renaming (id to id₂ ; left_id to left_id₂)
+    open Category 𝒞₂ renaming (id to id₂ ; left-id to left-id₂)
 
 Id : {n m : Level} {𝒞 : Category n m} -> 𝒞 => 𝒞
 Id = record
@@ -95,7 +95,7 @@ _[_,-] {𝓐 = 𝓐} {𝓑} {𝓒} (functor Fo Fm F-id F-cmp) A =
     F-id
     λ {B C D g h} ->
       Fm (id 𝓐 {A} , g ∘𝓑 h)
-        <[ (λ >O< -> Fm (>O< , g ∘𝓑 h)) $= right_id 𝓐 ]=
+        <[ (λ >O< -> Fm (>O< , g ∘𝓑 h)) $= right-id 𝓐 ]=
       Fm ((id 𝓐 {A}) ∘𝓐 (id 𝓐 {A}) , g ∘𝓑 h)
         =[ F-cmp ]>
       Fm (id 𝓐 {A}, g) ∘𝓒 (Fm (id 𝓐 {A}, h))
@@ -115,7 +115,7 @@ _[-,_] {𝓐 = 𝓐} {𝓑} {𝓒} (functor Fo Fm F-id F-cmp) B =
     F-id
     λ {A C D g h} ->
       Fm (g ∘𝓐 h , id 𝓑 {B})
-        <[ (λ >O< -> Fm (g ∘𝓐 h , >O<)) $= left_id 𝓑 ]=
+        <[ (λ >O< -> Fm (g ∘𝓐 h , >O<)) $= left-id 𝓑 ]=
       Fm (g ∘𝓐 h , (id 𝓑 {B}) ∘𝓑 (id 𝓑 {B}))
         =[ F-cmp ]>
       Fm (g , id 𝓑 {B}) ∘𝓒 Fm (h , id 𝓑 {B})

@@ -21,7 +21,7 @@ module patterns {k l : Level} (𝒞 : Category k l) where
       and (assocRL =>>= ((_∘ xy) $= z₂∘yz=y₂) =>>= y₂∘xy=x₂)
 
   identitySpanReduction : {A A₁ A₂ : Obj} (a₁ : Mph A A₁) (a₂ : Mph A A₂) -> SpanReduction a₁ a₂ a₁ a₂
-  identitySpanReduction _ _ = record { u = id ; ev₁ = right_id ; ev₂ = right_id }
+  identitySpanReduction _ _ = record { u = id ; ev₁ = right-id ; ev₂ = right-id }
 
   record UniqueSpanReduction {X A A₁ A₂ : Obj} (x₁ : Mph X A₁) (x₂ : Mph X A₂) (a₁ : Mph A A₁) (a₂ : Mph A A₂) : Set l where
     constructor _uniquely_

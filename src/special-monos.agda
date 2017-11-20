@@ -41,12 +41,12 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
 
 
   epi_extrermal_mono_is_iso : {A B : Obj} {f : Mph A B} -> Epi f -> ExtremalMono f -> Iso f
-  epi_extrermal_mono_is_iso {f = f} epi-f ext-f = extremal id f (flipEq left_id) epi-f
+  epi_extrermal_mono_is_iso {f = f} epi-f ext-f = extremal id f (flipEq left-id) epi-f
     where open ExtremalMono ext-f
 
   strong-mono-composition : {A B C : Obj} {f : Mph B C} {g : Mph A B} -> StrongMono f -> StrongMono g -> StrongMono (f ∘ g)
   strong-mono-composition {f = f} {g = g} sf sg =
-    record { monic = mono_composition mono-f mono-g
+    record { monic = mono-composition mono-f mono-g
            ; strong = strong }
     where
       open StrongMono sf renaming (monic to mono-f ; strong to strong-f)
@@ -64,9 +64,9 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
   strong-mono-is-extremal (isMonic mono-m andStrong strong-m) =
     isMonic mono-m
     andExtremal λ f e m=fe epi-e →
-      case (strong-m e epi-e id f (flipEq (right_id =>>= m=fe))) of
+      case (strong-m e epi-e id f (flipEq (right-id =>>= m=fe))) of
       λ { (e⁻¹ , f=me⁻¹ , id=e⁻¹e) →
-        epi_section_is_iso epi-e (record { retraction = e⁻¹ ; evidence = flipEq id=e⁻¹e })
+        epi-section-is-iso epi-e (record { retraction = e⁻¹ ; evidence = flipEq id=e⁻¹e })
       }
 
   extremal-mono-decomposition : {A B C : Obj} (f : Mph B C) (g : Mph A B) -> ExtremalMono (f ∘ g) -> ExtremalMono g
@@ -106,9 +106,9 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
           case extremal-m h e' m=he' (pushout_of_epi_is_epi po epi-e) of λ { (iso e'⁻¹ e'⁻¹e'=id e'e'⁻¹=id) →
             let
               w = e'⁻¹ ∘ u'
-              h=me'⁻¹ = flipEq (((_∘ e'⁻¹) $= m=he') =>>= assocLR =>>= ((h ∘_) $= e'e'⁻¹=id) =>>= right_id)
+              h=me'⁻¹ = flipEq (((_∘ e'⁻¹) $= m=he') =>>= assocLR =>>= ((h ∘_) $= e'e'⁻¹=id) =>>= right-id)
               v=me'⁻¹u' = v=hu' =>>= ((_∘ u') $= h=me'⁻¹) =>>= assocLR
-              u=e'⁻¹u'e = flipEq left_id =>>=((_∘ u) $= (flipEq e'⁻¹e'=id)) =>>= assocLR =>>= ((e'⁻¹ ∘_) $= e'u=u'e)
+              u=e'⁻¹u'e = flipEq left-id =>>=((_∘ u) $= (flipEq e'⁻¹e'=id)) =>>= assocLR =>>= ((e'⁻¹ ∘_) $= e'u=u'e)
               u=e'⁻¹u'e = elim-m ((m ∘_) $= (u=e'⁻¹u'e =>>= assocRL))
             in w , v=me'⁻¹u' , u=e'⁻¹u'e
           }
@@ -128,7 +128,7 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
       andExtremal extremal-m'
         where
           rm-id : {D E F X : Obj} {r : Mph X E} {s : Mph E X} -> r ∘ s ≡ id -> (p : Mph E F) (q : Mph D E) -> (p ∘ r) ∘ (s ∘ q) ≡ p ∘ q
-          rm-id rs=id p q = assocRL =>>= ((_∘ q) $= (assocLR =>>= ((p ∘_) $= rs=id) =>>= right_id))
+          rm-id rs=id p q = assocRL =>>= ((_∘ q) $= (assocLR =>>= ((p ∘_) $= rs=id) =>>= right-id))
           mono-m' = pullback_of_mono_is_mono pb mono-m
           extremal-m' : {X : Obj} (h' : Mph X B) (e' : Mph P X) -> m' ≡ h' ∘ e' -> Epi e' -> Iso e'
           extremal-m' h' e' m'=h'e' epi-e' with pushout e' f'
@@ -140,8 +140,8 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
           ... | me⁻¹f''=fh' with univ-pb {f'' = h'} {g'' = e⁻¹ ∘ f''} (commutingSquare me⁻¹f''=fh')
           ... | (reduceSpanBy β witnessedBy f'β=e⁻¹f'' and m'β=h') uniquely _ with mono-m' | epi-e'
           ... | mono elim-m' | epi elim-e' = iso β βe'=id e'β=id where
-            βe'=id = elim-m' (assocRL =>>= ((_∘ e') $= m'β=h') =>>= (flipEq m'=h'e') =>>= (flipEq right_id))
-            e'β=id = elim-e' (assocLR =>>= ((e' ∘_) $= βe'=id) =>>= right_id =>>= flipEq left_id)
+            βe'=id = elim-m' (assocRL =>>= ((_∘ e') $= m'β=h') =>>= (flipEq m'=h'e') =>>= (flipEq right-id))
+            e'β=id = elim-e' (assocLR =>>= ((e' ∘_) $= βe'=id) =>>= right-id =>>= flipEq left-id)
 
     pulled-strong-mono-is-strong : {A B C : Obj} {m : Mph A C} {f : Mph B C}
                                    {P : Obj} {m' : Mph P B} {f' : Mph P A} ->

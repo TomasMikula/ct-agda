@@ -46,8 +46,8 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
       { cone = isEqualizing ((_∘ id) $= f=g)
       ; universal =
         λ { {_} {e₂} _ → record
-            { reduction = reduceMorphismBy e₂ witnessedBy left_id
-            ; unique = λ { (reduceMorphismBy u witnessedBy id∘u=e₂) → flipEq left_id =>>= id∘u=e₂ }
+            { reduction = reduceMorphismBy e₂ witnessedBy left-id
+            ; unique = λ { (reduceMorphismBy u witnessedBy id∘u=e₂) → flipEq left-id =>>= id∘u=e₂ }
             }
           }
       }
@@ -102,7 +102,7 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
 
   epi_equalizer_is_iso : {A B : Obj} {f g : Mph A B} (eq : EqualizerOf f g) -> Epi (EqualizerOf.e eq) -> Iso (EqualizerOf.e eq)
   epi_equalizer_is_iso {f = f} {g} eq isEpi with equalizer_is_mono eq
-  epi_equalizer_is_iso {f = f} {g} (equalizerData E e ((isEqualizing fe=ge) universally universal)) (epi elim-e) | mono-e = mono_retraction_is_iso mono-e retr-e
+  epi_equalizer_is_iso {f = f} {g} (equalizerData E e ((isEqualizing fe=ge) universally universal)) (epi elim-e) | mono-e = mono-retraction-is-iso mono-e retr-e
     where
       f=g = elim-e fe=ge
 
@@ -128,19 +128,19 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
       iso-e with equalizer_uniqueness idEq eq
       ... | (reduceMorphismBy d witnessedBy ed=id , iso d⁻¹ d⁻¹d=id dd⁻¹=id) =
         case d⁻¹=e of λ { refl -> iso d dd⁻¹=id d⁻¹d=id } where
-          d⁻¹=e = flipEq left_id =>>= ((_∘ d⁻¹) $= flipEq ed=id) =>>= assocLR =>>= ((e ∘_) $= dd⁻¹=id) =>>= right_id
+          d⁻¹=e = flipEq left-id =>>= ((_∘ d⁻¹) $= flipEq ed=id) =>>= assocLR =>>= ((e ∘_) $= dd⁻¹=id) =>>= right-id
 
   section_is_equalizer : {A B : Obj} {s : Mph A B} (sec : Section s) -> Equalizer (s ∘ Section.retraction sec) id s
   section_is_equalizer {A} {B} {s} record { retraction = r ; evidence = rs=id } =
     record
-      { cone = isEqualizing (assoc =>>= ((s ∘_) $= rs=id) =>>= right_id =>>= flipEq left_id)
+      { cone = isEqualizing (assoc =>>= ((s ∘_) $= rs=id) =>>= right-id =>>= flipEq left-id)
       ; universal = λ { {E₂} {e₂} (isEqualizing sre=e) → record
                         { reduction = record
                           { u = r ∘ e₂
-                          ; ev = flipEq assoc =>>= sre=e =>>= left_id
+                          ; ev = flipEq assoc =>>= sre=e =>>= left-id
                           }
                         ; unique = λ { record { u = u ; ev = su=e₂ } → 
-                            flipEq left_id =>>= ((_∘ u) $= (flipEq rs=id)) =>>= assoc =>>= ((r ∘_) $= su=e₂) }
+                            flipEq left-id =>>= ((_∘ u) $= (flipEq rs=id)) =>>= assoc =>>= ((r ∘_) $= su=e₂) }
                         }
                       }
       }
