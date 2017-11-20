@@ -14,19 +14,14 @@ module limits {k l : Level} (𝒞 : Category k l) where
   open Category using (Obj ; Mph ; HomSet ; id)
   open Category 𝒞 using (_∘_ ; assocLR ; assocRL) renaming (id to idC ; left_id to l-id ; right_id to r-id)
 
-  record Diagram {nj mj : Level} (J : Category nj mj) : Set (k ⊔ l ⊔ nj ⊔ mj) where
-    constructor diagram
-    field
-      functor : Functor J 𝒞
-
-    identity = Functor.identity functor
+  Diagram : {nj mj : Level} (J : Category nj mj) -> Set (k ⊔ l ⊔ nj ⊔ mj)
+  Diagram J = Functor J 𝒞
       
   record Cone {nj mj : Level} {J : Category nj mj} (D : Diagram J) : Set (k ⊔ l ⊔ nj ⊔ mj) where
     constructor coneFrom_by_
-    open Diagram D renaming (functor to F)
     field
       C : Obj 𝒞
-      trans : NatTrans (ConstFunctor C) F
+      trans : NatTrans (ConstFunctor C) D
     τ = NatTrans.τ trans
     naturality = NatTrans.naturality trans
 
@@ -73,15 +68,14 @@ module limits {k l : Level} (𝒞 : Category k l) where
   discretize C = discrete (Obj C)
 
   discreteDiagram : {nj mj : Level} {J : Category nj mj} -> Diagram J -> Diagram (discretize J)
-  discreteDiagram D = diagram (record
-                                 { mapObj = DObj
-                                 ; mapArr = λ { {A} {.A} refl → idC {DObj A} }
-                                 ; identity = refl
-                                 ; composition = λ {A B C} -> λ { {g = refl} {refl} → flipEq l-id }
-                                 })
-                               where
-                                 open Diagram D renaming (functor to DF)
-                                 open Functor DF renaming (mapObj to DObj ; mapArr to DArr ; identity to Did ; composition to Dcomp)
+  discreteDiagram D = record
+    { mapObj = DObj
+    ; mapArr = λ { {A} {.A} refl → idC {DObj A} }
+    ; identity = refl
+    ; composition = λ {A B C} -> λ { {g = refl} {refl} → flipEq l-id }
+    }
+    where
+      open Functor D renaming (mapObj to DObj ; mapArr to DArr ; identity to Did ; composition to Dcomp)
 
   discreteCone : {nj mj : Level} {J : Category nj mj} {D : Diagram J} -> Cone D -> Cone (discreteDiagram D)
   discreteCone {J = J} c = record
@@ -93,7 +87,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
     }
                                  
   powerDiagram : {n : Level} (A : Obj 𝒞) (X : Set n) -> Diagram (discrete X)
-  powerDiagram A X = diagram (ConstFunctor {𝒞₁ = discrete X} A)
+  powerDiagram A X = ConstFunctor {𝒞₁ = discrete X} A
 
   Δ-cone : {A : Obj 𝒞} {n : Level} {X : Set n} -> Cone (powerDiagram A X)
   Δ-cone {A} {n} {X} = record { C = A ; trans = record { τ = idC ; naturality = λ f -> l-id =>>= flipEq r-id } }
@@ -123,7 +117,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   equal-under-projections {A} {_} {X} {D} L {f} {g} pf=pg =
     let
       open LimitOf L renaming (cone to Lcone ; τ to p)
-      open Diagram D renaming (identity to Did)
+      open Functor D renaming (identity to Did)
       fCone : Cone D
       fCone = record { C = A ; trans = record
                                  { τ = p ∘ f
@@ -139,14 +133,14 @@ module limits {k l : Level} (𝒞 : Category k l) where
     in f=u =>>= flipEq g=u
 
   binaryProductDiagram : (A B : Obj 𝒞) -> Diagram (discrete (Doubleton A B))
-  binaryProductDiagram A B = diagram (record
+  binaryProductDiagram A B = record
     { mapObj = λ { (inl .A) → A ; (inr .B) → B }
     ; mapArr = λ { {inl _} refl → idC ; {inr _} refl → idC}
     ; identity = λ { {inl _} → refl ; {inr _} → refl}
     ; composition = λ { {inl _} {g = refl} {refl} → flipEq l-id
                       ; {inr _} {g = refl} {refl} → flipEq l-id
                       }
-    })
+    }
 
   binaryProductFromLimit : {A B : Obj 𝒞} -> LimitOf (binaryProductDiagram A B) -> Product 𝒞 A B
   binaryProductFromLimit {A} {B} L = record { P = P ; π₁ = pa ; π₂ = pb ; universal = universality } where
@@ -199,7 +193,7 @@ module limits {k l : Level} (𝒞 : Category k l) where
   limits-from-products-and-pullbacks prod pb {K = K} D c₁ c₂ c₂≠c₁ cmp =
     record { cone = gCone ; universal = gUniversal }
    where
-    open Functor (Diagram.functor D) renaming (mapObj to DObj ; mapArr to DArr)
+    open Functor D renaming (mapObj to DObj ; mapArr to DArr)
     
     P' = prod (discreteDiagram D)
     open LimitOf P' renaming ( C to P ; cone to Pcone ; universal to Puniversal )
