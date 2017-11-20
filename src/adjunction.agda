@@ -15,17 +15,17 @@ record Adjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} (L : 
   ε⁻¹ = NatEquiv.reverse ε
 
   field
-    𝜆 : (L ⊚ R) ∸> Id -- 𝜆 here is mathematical italic small lambda, Unicode U+1D706 (to avoid conflict with λ)
-    ρ : Id ∸> (R ⊚ L)
+    𝜆 : (L ⦾ R) ∸> Id -- 𝜆 here is mathematical italic small lambda, Unicode U+1D706 (to avoid conflict with λ)
+    ρ : Id ∸> (R ⦾ L)
 
-  Lρ = L <⊙ ρ
-  𝜆L = 𝜆 ⊙> L
-  ρR = ρ ⊙> R
-  R𝜆 = R <⊙ 𝜆
+  Lρ = L ⧀ ρ
+  𝜆L = 𝜆 ⧁ L
+  ρR = ρ ⧁ R
+  R𝜆 = R ⧀ 𝜆
 
   field
-    𝜆L⊙Lρ=1 : 𝜆L ⊙ Lρ ≡ 𝟙
-    R𝜆⊙ρR=1 : R𝜆 ⊙ ρR ≡ 𝟙
+    𝜆L⦿Lρ=1 : 𝜆L ⦿ Lρ ≡ 𝟙
+    R𝜆⦿ρR=1 : R𝜆 ⦿ ρR ≡ 𝟙
 
 homset-adjunction : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞}
                     (ε : (L -Hom- Id) <∸> (Id -Hom- R)) -> Adjoint L R
@@ -33,8 +33,8 @@ homset-adjunction {𝒞 = 𝒞} {𝒟 = 𝒟} {L = L} {R = R} ε' @ (natEquiv ε
   { ε = ε'
   ; 𝜆 = natTrans ε⁻¹ (id 𝒞) witnessedBy 𝜆-nat
   ; ρ = natTrans ε   (id 𝒟) witnessedBy ρ-nat
-  ; 𝜆L⊙Lρ=1 = equalNatTrans (extensionality' ε⁻¹[1]∘L[ε[1]]≡1)
-  ; R𝜆⊙ρR=1 = equalNatTrans (extensionality' R[ε⁻¹[1]]∘ε[1]≡1)
+  ; 𝜆L⦿Lρ=1 = equalNatTrans (extensionality' ε⁻¹[1]∘L[ε[1]]≡1)
+  ; R𝜆⦿ρR=1 = equalNatTrans (extensionality' R[ε⁻¹[1]]∘ε[1]≡1)
   }
  where
    open NatEquiv (NatEquiv.reverse ε') renaming (τ to ε⁻¹ ; naturality to ε⁻¹-nat)
@@ -63,20 +63,20 @@ homset-adjunction {𝒞 = 𝒞} {𝒟 = 𝒟} {L = L} {R = R} ε' @ (natEquiv ε
    R[ε⁻¹[1]]∘ε[1]≡1 = (Rm (ε⁻¹ (id 𝒞)) ∘𝒞= (flipEq r-idC)) =>>= flipEq (ε-nat (id 𝒞 , ε⁻¹ (id 𝒞)) =$ (id 𝒟)) =>>= (ε $= ((ε⁻¹ (id 𝒞) ∘𝒟= (l-idD =>>= L-id)) =>>= r-idD)) =>>= εε⁻¹=1 (id 𝒞)
 
 unit-counit-adjunction : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞}
-                         (𝜆 : (L ⊚ R) ∸> Id) (ρ : Id ∸> (R ⊚ L)) ->
-                         (𝜆 ⊙> L) ⊙ (L <⊙ ρ) ≡ 𝟙 -> (R <⊙ 𝜆) ⊙ (ρ ⊙> R) ≡ 𝟙 -> Adjoint L R
-unit-counit-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor _ Rm _ R-cmp} 𝜆'@(natTrans 𝜆 witnessedBy 𝜆-nat) ρ'@(natTrans ρ witnessedBy ρ-nat) 𝜆L⊙Lρ=1 R𝜆⊙ρR=1 = record
+                         (𝜆 : (L ⦾ R) ∸> Id) (ρ : Id ∸> (R ⦾ L)) ->
+                         (𝜆 ⧁ L) ⦿ (L ⧀ ρ) ≡ 𝟙 -> (R ⧀ 𝜆) ⦿ (ρ ⧁ R) ≡ 𝟙 -> Adjoint L R
+unit-counit-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor _ Rm _ R-cmp} 𝜆'@(natTrans 𝜆 witnessedBy 𝜆-nat) ρ'@(natTrans ρ witnessedBy ρ-nat) 𝜆L⦿Lρ=1 R𝜆⦿ρR=1 = record
   { ε = natEquiv (λ φ → Rm φ ∘𝒞 ρ)
         witnessedBy (λ {(f , g) → extensionality λ φ -> R-cmp =∘𝒞 ρ =>>= (assocC =>>= (Rm g ∘𝒞= (R-cmp =∘𝒞 ρ =>>= (assocC =>>= (Rm φ ∘𝒞= flipEq (ρ-nat f)) =>>= assocC'))))})
         and λ { {X , Y} ->
           iso (λ ψ -> 𝜆 ∘𝒟 Lm ψ)
-              (extensionality λ φ -> 𝜆 ∘𝒟= L-cmp =>>= assocD' =>>= 𝜆-nat φ =∘𝒟 Lm ρ =>>= assocD =>>= φ ∘𝒟= (NatTrans.τ $= 𝜆L⊙Lρ=1 =$' X) =>>= r-idD)
-              (extensionality λ ψ -> R-cmp =∘𝒞 ρ =>>= assocC =>>= (Rm 𝜆 ∘𝒞= flipEq (ρ-nat ψ)) =>>= assocC' =>>= NatTrans.τ $= R𝜆⊙ρR=1 =$' Y =∘𝒞 ψ =>>= l-idC)
+              (extensionality λ φ -> 𝜆 ∘𝒟= L-cmp =>>= assocD' =>>= 𝜆-nat φ =∘𝒟 Lm ρ =>>= assocD =>>= φ ∘𝒟= (NatTrans.τ $= 𝜆L⦿Lρ=1 =$' X) =>>= r-idD)
+              (extensionality λ ψ -> R-cmp =∘𝒞 ρ =>>= assocC =>>= (Rm 𝜆 ∘𝒞= flipEq (ρ-nat ψ)) =>>= assocC' =>>= NatTrans.τ $= R𝜆⦿ρR=1 =$' Y =∘𝒞 ψ =>>= l-idC)
         }
   ; 𝜆 = 𝜆'
   ; ρ = ρ'
-  ; 𝜆L⊙Lρ=1 = 𝜆L⊙Lρ=1
-  ; R𝜆⊙ρR=1 = R𝜆⊙ρR=1
+  ; 𝜆L⦿Lρ=1 = 𝜆L⦿Lρ=1
+  ; R𝜆⦿ρR=1 = R𝜆⦿ρR=1
   }
  where
   open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; assoc to assocC ; assocRL to assocC' ; left-id to l-idC)

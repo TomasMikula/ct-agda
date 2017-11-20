@@ -20,10 +20,10 @@ record NatTrans {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
 syntax NatTrans F G = F ∸> G
 
 -- Composition of natural transformations.
--- Unicode symbol U+2299.
-_⊙_ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H : Functor 𝒞 𝒟} ->
+-- Unicode symbol U+29BF.
+_⦿_ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H : Functor 𝒞 𝒟} ->
       NatTrans G H -> NatTrans F G -> NatTrans F H
-_⊙_ {𝒞 = 𝒞} {𝒟 = 𝒟} {F} {G} {H} (natTrans τ witnessedBy τ-naturality) (natTrans σ witnessedBy σ-naturality) =
+_⦿_ {𝒞 = 𝒞} {𝒟 = 𝒟} {F} {G} {H} (natTrans τ witnessedBy τ-naturality) (natTrans σ witnessedBy σ-naturality) =
   natTrans (τ ∘ σ) witnessedBy naturality where
     open Category using (Obj ; Mph)
     open Category 𝒟 using (_∘_ ; assocLR ; assocRL)
@@ -59,31 +59,33 @@ equalNatTrans {𝒞 = 𝒞} {𝒟 = 𝒟} {functor _ F _ _} {functor _ G _ _}
   res = case naturality-eq of λ { refl -> refl }
 
 -- Associativity of composition of natural transformations.
-assoc-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H I : Functor 𝒞 𝒟}
-          {α : H ∸> I} {β : G ∸> H} {γ : F ∸> G} -> (α ⊙ β) ⊙ γ ≡ α ⊙ (β ⊙ γ)
-assoc-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' assoc) where open Category 𝒟 using (assoc)
+assoc-⦿ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G H I : Functor 𝒞 𝒟}
+          {α : H ∸> I} {β : G ∸> H} {γ : F ∸> G} -> (α ⦿ β) ⦿ γ ≡ α ⦿ (β ⦿ γ)
+assoc-⦿ {𝒟 = 𝒟} = equalNatTrans (extensionality' assoc) where open Category 𝒟 using (assoc)
 
 -- Left identity for composition of natural transformations.
-left-id-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
-            {α : F ∸> G} -> 𝟙 ⊙ α ≡ α
-left-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' left-id) where open Category 𝒟 using (left-id)
+left-id-⦿ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+            {α : F ∸> G} -> 𝟙 ⦿ α ≡ α
+left-id-⦿ {𝒟 = 𝒟} = equalNatTrans (extensionality' left-id) where open Category 𝒟 using (left-id)
 
 -- Right identity for composition of natural transformations.
-right-id-⊙ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
-             {α : F ∸> G} -> α ⊙ 𝟙 ≡ α
-right-id-⊙ {𝒟 = 𝒟} = equalNatTrans (extensionality' right-id) where open Category 𝒟 using (right-id)
+right-id-⦿ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+             {α : F ∸> G} -> α ⦿ 𝟙 ≡ α
+right-id-⦿ {𝒟 = 𝒟} = equalNatTrans (extensionality' right-id) where open Category 𝒟 using (right-id)
 
 
 -- Composition of natural transformation and functor.
-_⊙>_ : {nb mb nc mc nd md : Level} {𝓑 : Category nb mb} {𝓒 : Category nc mc} {𝓓 : Category nd md} ->
-       {F G : 𝓒 => 𝓓} -> (F ∸> G) -> (K : 𝓑 => 𝓒) -> ((F ⊚ K) ∸> (G ⊚ K))
-(natTrans τ witnessedBy τ-nat) ⊙> K = natTrans (λ {A} -> τ {KObj A}) witnessedBy λ f -> τ-nat (KArr f) where
+-- Unicode symbol U+29C1.
+_⧁_ : {nb mb nc mc nd md : Level} {𝓑 : Category nb mb} {𝓒 : Category nc mc} {𝓓 : Category nd md} ->
+       {F G : 𝓒 => 𝓓} -> (F ∸> G) -> (K : 𝓑 => 𝓒) -> ((F ⦾ K) ∸> (G ⦾ K))
+(natTrans τ witnessedBy τ-nat) ⧁ K = natTrans (λ {A} -> τ {KObj A}) witnessedBy λ f -> τ-nat (KArr f) where
   open Functor K renaming (mapObj to KObj ; mapArr to KArr)
 
 -- Composition of functor and natural transformation.
-_<⊙_ : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd md} {𝓔 : Category ne me} ->
-       {F G : 𝓒 => 𝓓} -> (H : 𝓓 => 𝓔) -> (F ∸> G) -> ((H ⊚ F) ∸> (H ⊚ G))
-functor H HArr H-id H-cmp <⊙ (natTrans τ witnessedBy τ-nat) =
+-- Unicode symbol U+29C0.
+_⧀_ : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd md} {𝓔 : Category ne me} ->
+       {F G : 𝓒 => 𝓓} -> (H : 𝓓 => 𝓔) -> (F ∸> G) -> ((H ⦾ F) ∸> (H ⦾ G))
+functor H HArr H-id H-cmp ⧀ (natTrans τ witnessedBy τ-nat) =
   natTrans HArr τ witnessedBy λ f -> flipEq H-cmp =>>= (HArr $= τ-nat _) =>>= H-cmp
 
 -- Natural equivalence.

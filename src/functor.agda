@@ -38,10 +38,10 @@ Id = record
   }
 
 -- Functor composition.
--- Unicode symbol U+229A.
-_⊚_ : {n₁ m₁ n₂ m₂ n₃ m₃ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {𝒞₃ : Category n₃ m₃} ->
+-- Unicode symbol U+29BE.
+_⦾_ : {n₁ m₁ n₂ m₂ n₃ m₃ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {𝒞₃ : Category n₃ m₃} ->
       (𝒞₂ => 𝒞₃) -> (𝒞₁ => 𝒞₂) -> (𝒞₁ => 𝒞₃)
-(functor Fo Fm F-id F-cmp) ⊚ (functor Go Gm G-id G-cmp) = record
+(functor Fo Fm F-id F-cmp) ⦾ (functor Go Gm G-id G-cmp) = record
   { mapObj = λ A -> Fo (Go A)
   ; mapArr = λ f -> Fm (Gm f)
   ; identity = (Fm $= G-id) =>>= F-id
@@ -74,16 +74,16 @@ equalFunctors (refl , refl) =
   equalFunctors' ((refl , refl) , (extensionality' eqUnicity , extensionality' (extensionality' (extensionality' (extensionality' (extensionality' eqUnicity))))))
 
 -- Associativity of functor composition.
-assoc-⊚ : {n₁ m₁ n₂ m₂ n₃ m₃ n₄ m₄ : Level}
+assoc-⦾ : {n₁ m₁ n₂ m₂ n₃ m₃ n₄ m₄ : Level}
           {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {𝒞₃ : Category n₃ m₃} {𝒞₄ : Category n₄ m₄}
-          {F : 𝒞₃ => 𝒞₄} {G : 𝒞₂ => 𝒞₃} {H : 𝒞₁ => 𝒞₂} -> (F ⊚ G) ⊚ H ≡ F ⊚ (G ⊚ H)
-assoc-⊚ = equalFunctors (refl , refl)
+          {F : 𝒞₃ => 𝒞₄} {G : 𝒞₂ => 𝒞₃} {H : 𝒞₁ => 𝒞₂} -> (F ⦾ G) ⦾ H ≡ F ⦾ (G ⦾ H)
+assoc-⦾ = equalFunctors (refl , refl)
 
-left-id-⊚ : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {F : 𝒞₁ => 𝒞₂} -> Id ⊚ F ≡ F
-left-id-⊚ = equalFunctors (refl , refl)
+left-id-⦾ : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {F : 𝒞₁ => 𝒞₂} -> Id ⦾ F ≡ F
+left-id-⦾ = equalFunctors (refl , refl)
 
-right-id-⊚ : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {F : 𝒞₁ => 𝒞₂} -> F ⊚ Id ≡ F
-right-id-⊚ = equalFunctors (refl , refl)
+right-id-⦾ : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂} {F : 𝒞₁ => 𝒞₂} -> F ⦾ Id ≡ F
+right-id-⦾ = equalFunctors (refl , refl)
 
 -- `F [ A ,-]` is functor `F : 𝓐⨂𝓑 => 𝓒` (partially) applied to object A of 𝓐, resulting in a functor `𝓑 => 𝓒`.
 _[_,-] : ∀ {ka la kb lb kc lc} {𝓐 : Category ka la} {𝓑 : Category kb lb} {𝓒 : Category kc lc}
