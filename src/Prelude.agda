@@ -1,6 +1,7 @@
 {-# OPTIONS --rewriting #-}
 
 open import Agda.Primitive public
+open import Level public
 open import Relation.Binary.Core public using (_≡_ ; _≢_ ; refl)
 open import Relation.Binary.HeterogeneousEquality public using (_≅_; refl ; ≅-to-≡)
 open import Data.Product
