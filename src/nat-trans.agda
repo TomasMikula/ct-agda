@@ -123,3 +123,15 @@ record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
   ... | record { τ = ρ ; naturality = ρ-nat ; isomorphic = ρ-iso } = natTrans ρ witnessedBy ρ-nat
 
 syntax NatEquiv F G = F <∸> G
+
+-- Helper for proving equality of natural equivalences.
+equalNatEquivs : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
+                 {α β : F <∸> G} -> NatTransEqWitness (NatEquiv.trans α) (NatEquiv.trans β) -> α ≡ β
+equalNatEquivs {𝒞 = 𝒞} {𝒟 = 𝒟} {functor _ F _ _} {functor _ G _ _}
+               {α' @(natEquiv α witnessedBy α-nat and α-iso)} {β' @(natEquiv .α witnessedBy β-nat and β-iso)} w @refl with equalNatTrans {α = NatEquiv.trans α'} {β = NatEquiv.trans β'} w
+... | refl = res where
+  open Category
+  open morphisms 𝒟
+  iso-eq : _≡_ {_} { {A : Obj 𝒞} -> Iso (α {A}) } α-iso  β-iso
+  iso-eq = extensionality' iso-uniqueness
+  res = case iso-eq of λ { refl -> refl }

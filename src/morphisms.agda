@@ -125,3 +125,22 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
   mono-decomposition f g mono-fg =
     mono (λ gα=gβ -> elimL (assocLR =>>= ((f ∘_) $= gα=gβ) =>>= assocRL))
     where open Mono mono-fg using (elimL)
+
+  -- If g is left inverse of f and h is right inverse of f, then g = h.
+  inverse-uniqueness : {A B : Obj} {f : Mph A B} {g h : Mph B A} ->
+                       g ∘ f ≡ id -> f ∘ h ≡ id -> g ≡ h
+  inverse-uniqueness {A} {B} {f} {g} {h} gf=id fh=id =
+    g               <[ right-id   ]=
+    g ∘ id          <[ g ∘= fh=id ]=
+    g ∘ (f ∘ h)     <[ assoc      ]=
+    (g ∘ f) ∘ h     =[ gf=id =∘ h ]>
+    id ∘ h          =[ left-id    ]>
+    h
+    ∎
+
+  iso-uniqueness : {A B : Obj} {f : Mph A B} {α β : Iso f} -> α ≡ β
+  iso-uniqueness {A} {B} {f} {α @(iso g gf=id fg=id)} {β @(iso h hf=id fh=id)} with inverse-uniqueness gf=id fh=id
+  ... | refl = helper (eqUnicity , eqUnicity)
+   where
+    helper : (gf=id ≡ hf=id) × (fg=id ≡ fh=id) -> α ≡ β
+    helper (refl , refl) = refl

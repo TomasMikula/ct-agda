@@ -8,6 +8,8 @@ open import hom-functors
 open import nat-trans
 open import morphisms using (Iso ; iso)
 
+open Category
+
 -- Adjunction of functors witnessed by a natural isomorphism of hom-sets.
 record HomsetAdjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} (L : 𝒞 => 𝒟) (R : 𝒟 => 𝒞) : Set (lsuc m ⊔ k ⊔ l) where
   constructor homsetAdjoint
@@ -18,7 +20,7 @@ record HomsetAdjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m}
 
 -- Adjunction of functors witnessed by the unit and co-unit natural transformations.
 record UnitCounitAdjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} (L : 𝒞 => 𝒟) (R : 𝒟 => 𝒞) : Set (lsuc m ⊔ k ⊔ l) where
-  constructor unit_counit_L-id_R-id_
+  constructor unit_counit_L-𝟙_R-𝟙_
   field
     ρ : Id ∸> (R ⦾ L)
     𝜆 : (L ⦾ R) ∸> Id -- 𝜆 here is mathematical italic small lambda, Unicode U+1D706 (to avoid conflict with λ)
@@ -49,7 +51,6 @@ homset-to-units-adjunction {𝒞 = 𝒞} {𝒟 = 𝒟} {L = L} {R = R}
    open NatEquiv (HomsetAdjoint.ε⁻¹ hs-adj) renaming (τ to ε⁻¹ ; naturality to ε⁻¹-nat)
    open Functor L renaming (mapObj to Lo ; mapArr to Lm ; identity to L-id)
    open Functor R renaming (mapObj to Ro ; mapArr to Rm ; identity to R-id)
-   open Category using (Obj ; Mph ; id ; left-id ; right-id ; assoc)
    open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; _=∘=_ to _=∘𝒞=_)
    open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _∘=_ to  _∘𝒟=_)
    
@@ -112,8 +113,8 @@ units-to-homset-adjunction : {k l m : Level} {𝒞 : Category k m} {𝒟 : Categ
 units-to-homset-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor _ Rm _ R-cmp}
                            (unit   (natTrans ρ witnessedBy ρ-nat)
                             counit (natTrans 𝜆 witnessedBy 𝜆-nat)
-                            L-id   𝜆L⦿Lρ=1
-                            R-id   R𝜆⦿ρR=1) =
+                            L-𝟙    𝜆L⦿Lρ=1
+                            R-𝟙    R𝜆⦿ρR=1) =
   homsetAdjoint (
     natEquiv (λ φ → Rm φ ∘𝒞 ρ)
       witnessedBy (λ {(f , g) → extensionality λ φ ->
@@ -129,3 +130,44 @@ units-to-homset-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor 
   open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; assoc to assocC ; assocRL to assocC' ; left-id to l-idC)
   open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _=∘_ to _=∘𝒟_ ; _∘=_ to _∘𝒟=_ ; assoc to assocD ; assocRL to assocD' ; right-id to r-idD)
 
+
+homset-to-units-to-homset-is-id : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
+                                  (A : HomsetAdjoint L R) -> units-to-homset-adjunction (homset-to-units-adjunction A) ≡ A
+homset-to-units-to-homset-is-id {𝒞 = 𝒞} {𝒟} {functor _ Lm L-id _} {functor _ Rm _ _} (homsetAdjoint (natEquiv ε witnessedBy ε-nat and ε-iso)) =
+  homsetAdjoint $= equalNatEquivs (extensionality' (extensionality λ φ ->
+    Rm φ  ∘𝒞   ε (id 𝒟)                    =[ flipEq (right-id 𝒞) =>>= assoc 𝒞 ]>
+    Rm φ  ∘𝒞  (ε (id 𝒟)  ∘𝒞     id 𝒞 )     <[ ε-nat (id 𝒞 , φ) =$ id 𝒟 ]=
+    ε (φ  ∘𝒟  (   id 𝒟   ∘𝒟 Lm (id 𝒞)))    =[ ε $= (φ ∘𝒟= (left-id 𝒟 =>>= L-id)) ]>
+    ε (φ  ∘𝒟                    id 𝒟  )    =[ ε $= right-id 𝒟 ]>
+    ε φ
+    ∎
+  ))
+  where
+  open Category 𝒞 using () renaming (_∘_ to _∘𝒞_)
+  open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _∘=_ to _∘𝒟=_)
+
+UnitAdjointEqWitness : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} (A B : UnitCounitAdjoint L R) -> Set (m ⊔ l ⊔ k)
+UnitAdjointEqWitness A B = (UnitCounitAdjoint.ρ A ≡ UnitCounitAdjoint.ρ B) × (UnitCounitAdjoint.𝜆 A ≡ UnitCounitAdjoint.𝜆 B)
+
+equal-unit-adjunctions : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
+                         {A B : UnitCounitAdjoint L R} -> UnitAdjointEqWitness A B -> A ≡ B
+equal-unit-adjunctions {A = A @(unit ρ counit 𝜆 L-𝟙 L1 R-𝟙 R1)} {B @(unit .ρ counit .𝜆 L-𝟙 L1' R-𝟙 R1')} (refl , refl) =
+  helper eqUnicity eqUnicity
+ where
+  helper : L1 ≡ L1' -> R1 ≡ R1' -> A ≡ B
+  helper refl refl = refl
+
+units-to-homset-to-units-is-id : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
+                                 (A : UnitCounitAdjoint L R) -> homset-to-units-adjunction (units-to-homset-adjunction A) ≡ A
+units-to-homset-to-units-is-id {𝒞 = 𝒞} {𝒟} {functor _ Lm L-id _} {functor _ Rm R-id _}
+                               (unit   natTrans ρ witnessedBy ρ-nat
+                                counit natTrans 𝜆 witnessedBy 𝜆-nat
+                                L-𝟙 𝜆L⦿Lρ=1
+                                R-𝟙 R𝜆⦿ρR=1) =
+  equal-unit-adjunctions (
+    (equalNatTrans (extensionality' (Rm (id 𝒟) ∘𝒞 ρ  =[ R-id =∘𝒞 ρ =>>= left-id 𝒞  ]>  ρ  ∎))) ,
+    (equalNatTrans (extensionality' (𝜆 ∘𝒟 Lm (id 𝒞)  =[ 𝜆 ∘𝒟= L-id =>>= right-id 𝒟 ]>  𝜆  ∎)))
+  )
+ where
+  open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ )
+  open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _∘=_ to _∘𝒟=_)
