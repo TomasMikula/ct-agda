@@ -19,7 +19,7 @@ record HomsetAdjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m}
   ε⁻¹ = NatEquiv.reverse ε
 
 -- Adjunction of functors witnessed by the unit and co-unit natural transformations.
-record UnitCounitAdjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} (L : 𝒞 => 𝒟) (R : 𝒟 => 𝒞) : Set (lsuc m ⊔ k ⊔ l) where
+record UnitCounitAdjoint {k l m n : Level} {𝒞 : Category k l} {𝒟 : Category m n} (L : 𝒞 => 𝒟) (R : 𝒟 => 𝒞) : Set (k ⊔ lsuc l ⊔ m ⊔ lsuc n) where
   constructor unit_counit_L-𝟙_R-𝟙_
   field
     ρ : Id ∸> (R ⦾ L)
@@ -146,10 +146,10 @@ homset-to-units-to-homset-is-id {𝒞 = 𝒞} {𝒟} {functor _ Lm L-id _} {func
   open Category 𝒞 using () renaming (_∘_ to _∘𝒞_)
   open Category 𝒟 using () renaming (_∘_ to _∘𝒟_ ; _∘=_ to _∘𝒟=_)
 
-UnitAdjointEqWitness : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} (A B : UnitCounitAdjoint L R) -> Set (m ⊔ l ⊔ k)
+UnitAdjointEqWitness : {k l m n : Level} {𝒞 : Category k l} {𝒟 : Category m n} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} (A B : UnitCounitAdjoint L R) -> Set (k ⊔ l ⊔ m ⊔ n)
 UnitAdjointEqWitness A B = (UnitCounitAdjoint.ρ A ≡ UnitCounitAdjoint.ρ B) × (UnitCounitAdjoint.𝜆 A ≡ UnitCounitAdjoint.𝜆 B)
 
-equal-unit-adjunctions : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
+equal-unit-adjunctions : {k l m n : Level} {𝒞 : Category k l} {𝒟 : Category m n} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
                          {A B : UnitCounitAdjoint L R} -> UnitAdjointEqWitness A B -> A ≡ B
 equal-unit-adjunctions {A = A @(unit ρ counit 𝜆 L-𝟙 L1 R-𝟙 R1)} {B @(unit .ρ counit .𝜆 L-𝟙 L1' R-𝟙 R1')} (refl , refl) =
   helper eqUnicity eqUnicity
