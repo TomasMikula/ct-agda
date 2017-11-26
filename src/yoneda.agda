@@ -76,10 +76,10 @@ Y-elem' F B α = lift (Y-elem F B α)
 Yoneda' : ∀ {k l} {𝒞 : Category k l} (F : (op 𝒞) => (SET l)) (B : Obj 𝒞) -> Iso (SET (lsuc l ⊔ k)) (Y-trans' F B)
 Yoneda' F B with Yoneda F B
 ... | isInvertible el el∘tr=id tr∘el=id =
-  iso
-    (λ α -> lift (el α))
-    (extensionality λ { (lift b) -> lift $= (el∘tr=id =$ b) })
-    tr∘el=id
+  iso (λ α -> lift (el α))
+    ( (extensionality λ { (lift b) -> lift $= (el∘tr=id =$ b) })
+    , tr∘el=id
+    )
 
 -- Returns a functor mapping each object B of 𝒞ᵒᵖ to the set of natural transformations from 𝒞(-, B) to F.
 Hom-to-F : ∀ {k l} {𝒞 : Category k l} (F : (op 𝒞) => (SET l)) -> ((op 𝒞) => SET (lsuc l ⊔ k))

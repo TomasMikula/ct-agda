@@ -41,4 +41,4 @@ module products {n m : Level} (𝒞 : Category n m) where
       pq = SpanReduction.u p-q
       qp = SpanReduction.u q-p
 
-    in pq , iso qp (proveId-p (composeSpanReductions q-p p-q)) (proveId-q (composeSpanReductions p-q q-p))
+    in pq , iso qp (proveId-p (composeSpanReductions q-p p-q) , proveId-q (composeSpanReductions p-q q-p))

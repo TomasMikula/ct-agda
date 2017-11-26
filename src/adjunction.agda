@@ -84,10 +84,10 @@ homset-to-units-adjunction {𝒞 = 𝒞} {𝒟 = 𝒟} {L = L} {R = R}
      Rm (Lm f)  ∘𝒞  ε (id 𝒟 {Lo X'})                            ∎
 
    ε⁻¹ε=1 : {X : Obj 𝒞} {Y : Obj 𝒟} (g : Mph 𝒟 (Lo X) Y) -> ε⁻¹ (ε g) ≡ g
-   ε⁻¹ε=1 g = Iso.leftInverse ε-iso =$ g
+   ε⁻¹ε=1 g = Σ.proj₁ (Iso.evidence ε-iso) =$ g
 
    εε⁻¹=1 : {X : Obj 𝒞} {Y : Obj 𝒟} (f : Mph 𝒞 X (Ro Y)) -> ε (ε⁻¹ f) ≡ f
-   εε⁻¹=1 f = Iso.rightInverse ε-iso =$ f
+   εε⁻¹=1 f = Σ.proj₂ (Iso.evidence ε-iso) =$ f
    
    ε⁻¹[1]∘L[ε[1]]≡1 : {X : Obj 𝒞} -> (ε⁻¹ (id 𝒞 {Ro (Lo X)}) ∘𝒟 Lm (ε (id 𝒟 {Lo X})) ≡ id 𝒟 {Lo X})
    ε⁻¹[1]∘L[ε[1]]≡1 {X} =
@@ -122,8 +122,9 @@ units-to-homset-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor 
         })
       , λ { {X , Y} ->
         iso (λ ψ -> 𝜆 ∘𝒟 Lm ψ)
-            (extensionality λ φ -> 𝜆 ∘𝒟= L-cmp =>>= assocD' =>>= 𝜆-nat φ =∘𝒟 Lm ρ =>>= assocD =>>= φ ∘𝒟= (NatTrans.τ $= 𝜆L⦿Lρ=1 =$' X) =>>= r-idD)
-            (extensionality λ ψ -> R-cmp =∘𝒞 ρ =>>= assocC =>>= (Rm 𝜆 ∘𝒞= flipEq (ρ-nat ψ)) =>>= assocC' =>>= NatTrans.τ $= R𝜆⦿ρR=1 =$' Y =∘𝒞 ψ =>>= l-idC)
+          ( (extensionality λ φ -> 𝜆 ∘𝒟= L-cmp =>>= assocD' =>>= 𝜆-nat φ =∘𝒟 Lm ρ =>>= assocD =>>= φ ∘𝒟= (NatTrans.τ $= 𝜆L⦿Lρ=1 =$' X) =>>= r-idD)
+          , (extensionality λ ψ -> R-cmp =∘𝒞 ρ =>>= assocC =>>= (Rm 𝜆 ∘𝒞= flipEq (ρ-nat ψ)) =>>= assocC' =>>= NatTrans.τ $= R𝜆⦿ρR=1 =$' Y =∘𝒞 ψ =>>= l-idC)
+          )
         }
       )
   )

@@ -1,3 +1,4 @@
+open import Data.Product
 open import Prelude
 open import category
 
@@ -6,10 +7,10 @@ module op-morphisms where
   open import morphisms
   
   op-iso : {k l : Level} {𝒞 : Category k l} {A B : Obj 𝒞} {f : Mph 𝒞 A B} -> Iso 𝒞 f -> Iso (op 𝒞) f
-  op-iso (iso f⁻¹ f⁻¹f=id ff⁻¹=id) = iso f⁻¹ ff⁻¹=id f⁻¹f=id
+  op-iso (iso f⁻¹ (f⁻¹f=id , ff⁻¹=id)) = iso f⁻¹ (ff⁻¹=id , f⁻¹f=id)
 
   unop-iso : {k l : Level} {𝒞 : Category k l} {A B : Obj 𝒞} {f : Mph (op 𝒞) B A} -> Iso (op 𝒞) f -> Iso 𝒞 f
-  unop-iso (iso f⁻¹ f⁻¹f=id ff⁻¹=id) = iso f⁻¹ ff⁻¹=id f⁻¹f=id
+  unop-iso (iso f⁻¹ (f⁻¹f=id , ff⁻¹=id)) = iso f⁻¹ (ff⁻¹=id , f⁻¹f=id)
 
   op-mono : {k l : Level} {𝒞 : Category k l} {A B : Obj 𝒞} {f : Mph 𝒞 A B} -> Mono 𝒞 f -> Epi (op 𝒞) f
   op-mono (mono elim-f) = epi elim-f

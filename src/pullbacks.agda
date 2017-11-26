@@ -58,8 +58,8 @@ module pullbacks {n m : Level} (𝒞 : Category n m) where
       u21 = SpanReduction.u r21
     in u12 , record
                { inverse = u21
-               ; leftInverse  = proveId1 (composeSpanReductions r21 r12)
-               ; rightInverse = proveId2 (composeSpanReductions r12 r21)
+               ; evidence  = proveId1 (composeSpanReductions r21 r12)
+                           , proveId2 (composeSpanReductions r12 r21)
                }
 
   pullback_uniqueness' : {C A B : Obj} {f : Mph A C} {g : Mph B C}

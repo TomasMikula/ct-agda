@@ -118,17 +118,20 @@ record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
   naturality = Σ.proj₁ naturalIso
   isomorphic = Σ.proj₂ naturalIso
 
+  τ⁻¹ : {A : Obj 𝒞} → Mph 𝒟 (Gobj A) (Fobj A)
+  τ⁻¹ = Iso.inverse isomorphic
+
+  τ⁻¹τ=id = λ {A} -> Σ.proj₁ (Iso.evidence (isomorphic {A}))
+  ττ⁻¹=id = λ {A} -> Σ.proj₂ (Iso.evidence (isomorphic {A}))
+
   reverse : NatEquiv G F
   reverse = record
-    { τ = rev-τ
-    ; naturalIso = (rev-nat , Iso.reverse isomorphic)
+    { τ = τ⁻¹
+    ; naturalIso = (τ⁻¹-nat , Iso.reverse isomorphic)
     }
    where
-    rev-τ : {A : Obj 𝒞} → Mph 𝒟 (Gobj A) (Fobj A)
-    rev-τ = Iso.inverse isomorphic
-
-    rev-nat : {A B : Obj 𝒞} (f : Mph 𝒞 A B) → (rev-τ ∘ Garr f) ≡ (Farr f ∘ rev-τ)
-    rev-nat {A} {B} f = flipEq right-id =>>= (((rev-τ ∘ Garr f) ∘_) $= flipEq (Iso.rightInverse isomorphic)) =>>= assocRL =>>= ((_∘ rev-τ) $= (assocLR =>>= ((rev-τ ∘_) $= flipEq (naturality f)) =>>= assocRL =>>= ((_∘ Farr f) $= (Iso.leftInverse isomorphic)) =>>= left-id))
+    τ⁻¹-nat : {A B : Obj 𝒞} (f : Mph 𝒞 A B) → (τ⁻¹ ∘ Garr f) ≡ (Farr f ∘ τ⁻¹)
+    τ⁻¹-nat {A} {B} f = flipEq right-id =>>= (((τ⁻¹ ∘ Garr f) ∘_) $= flipEq ττ⁻¹=id) =>>= assocRL =>>= ((_∘ τ⁻¹) $= (assocLR =>>= ((τ⁻¹ ∘_) $= flipEq (naturality f)) =>>= assocRL =>>= ((_∘ Farr f) $= τ⁻¹τ=id) =>>= left-id))
 
   trans : NatTrans F G
   trans = natTrans τ witnessedBy naturality

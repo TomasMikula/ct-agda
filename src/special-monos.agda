@@ -103,7 +103,7 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
       isMonic mono-m
       andStrong λ e epi-e u v ve=mu → case pushout e u of λ { (pushoutData _ e' u' po@(isPushout e'u=u'e univ)) →
         case univ (commutingSquare (flipEq ve=mu)) of λ { ((reduceCospanBy h witnessedBy v=hu' and m=he') uniquely uniq) →
-          case extremal-m h e' m=he' (pushout_of_epi_is_epi po epi-e) of λ { (iso e'⁻¹ e'⁻¹e'=id e'e'⁻¹=id) →
+          case extremal-m h e' m=he' (pushout_of_epi_is_epi po epi-e) of λ { (iso e'⁻¹ (e'⁻¹e'=id , e'e'⁻¹=id)) →
             let
               w = e'⁻¹ ∘ u'
               h=me'⁻¹ = flipEq (((_∘ e'⁻¹) $= m=he') =>>= assocLR =>>= ((h ∘_) $= e'e'⁻¹=id) =>>= right-id)
@@ -136,10 +136,10 @@ module special-monos {k l : Level} (𝒞 : Category k l) where
           ... | epi-e with mf'=fm' =>>= ((f ∘_) $= m'=h'e') =>>= assocRL
           ... | mf'=fh'e' with univ-po (commutingSquare mf'=fh'e')
           ... | (reduceCospanBy h witnessedBy fh'=hf'' and m=he) uniquely _ with ext-m h e m=he epi-e
-          ... | iso e⁻¹ e⁻¹e=id ee⁻¹=id with ((_∘ (e⁻¹ ∘ f'')) $= m=he) =>>= (rm-id ee⁻¹=id h f'') =>>= (flipEq fh'=hf'')
+          ... | iso e⁻¹ (e⁻¹e=id , ee⁻¹=id) with ((_∘ (e⁻¹ ∘ f'')) $= m=he) =>>= (rm-id ee⁻¹=id h f'') =>>= (flipEq fh'=hf'')
           ... | me⁻¹f''=fh' with univ-pb {f'' = h'} {g'' = e⁻¹ ∘ f''} (commutingSquare me⁻¹f''=fh')
           ... | (reduceSpanBy β witnessedBy f'β=e⁻¹f'' and m'β=h') uniquely _ with mono-m' | epi-e'
-          ... | mono elim-m' | epi elim-e' = iso β βe'=id e'β=id where
+          ... | mono elim-m' | epi elim-e' = iso β (βe'=id , e'β=id) where
             βe'=id = elim-m' (assocRL =>>= ((_∘ e') $= m'β=h') =>>= (flipEq m'=h'e') =>>= (flipEq right-id))
             e'β=id = elim-e' (assocLR =>>= ((e' ∘_) $= βe'=id) =>>= right-id =>>= flipEq left-id)
 

@@ -29,15 +29,17 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
       section : Mph B A
       evidence : (r ∘ section) ≡ id
 
+  MutuallyInverse : {A B : Obj} (f : Mph A B) (g : Mph B A) -> Set l
+  MutuallyInverse f g = (g ∘ f ≡ id) × (f ∘ g ≡ id)
+
   record Iso {A B : Obj} (f : Mph A B) : Set l where
     constructor iso
     field
       inverse : Mph B A
-      leftInverse  : (inverse ∘ f) ≡ id
-      rightInverse : (f ∘ inverse) ≡ id
+      evidence : MutuallyInverse f inverse
 
     reverse : Iso inverse
-    reverse = record { inverse = f ; leftInverse = rightInverse ; rightInverse = leftInverse }
+    reverse = record { inverse = f ; evidence = swap evidence }
 
   -- reduce f to g, via u
   record MorphismReduction {A B C : Obj} (f : Mph A C) (g : Mph B C) : Set l where
@@ -83,17 +85,17 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
       open Retraction r
 
   iso-is-retraction : {A B : Obj} {f : Mph A B} -> Iso f -> Retraction f
-  iso-is-retraction i = record { section = Iso.inverse i ; evidence = Iso.rightInverse i }
+  iso-is-retraction (iso g (gf=id , fg=id)) = hasSection g fg=id
 
   iso-is-section : {A B : Obj} {f : Mph A B} -> Iso f -> Section f
-  iso-is-section i = record { retraction = Iso.inverse i ; evidence = Iso.leftInverse i }
+  iso-is-section (iso g (gf=id , fd=id)) = hasRetraction g gf=id
 
   mono-retraction-is-iso : {A B : Obj} {f : Mph A B} -> Mono f -> Retraction f -> Iso f
   mono-retraction-is-iso {f = f} m r =
     record
       { inverse = section
-      ; leftInverse = elimL (flipEq assoc =>>= ((_∘ f) $= evidence) =>>= left-id =>>= flipEq right-id)
-      ; rightInverse = evidence
+      ; evidence = elimL (flipEq assoc =>>= ((_∘ f) $= evidence) =>>= left-id =>>= flipEq right-id)
+                 , evidence
       }
     where
       open Mono m
@@ -103,18 +105,19 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
   epi-section-is-iso {f = f} e s =
     record
       { inverse = retraction
-      ; leftInverse = evidence
-      ; rightInverse = elimR (assoc =>>= ((f ∘_) $= evidence) =>>= right-id =>>= flipEq left-id)
+      ; evidence = evidence
+                 , elimR (assoc =>>= ((f ∘_) $= evidence) =>>= right-id =>>= flipEq left-id)
       }
     where
       open Epi e
       open Section s
 
   iso-composition : {A B C : Obj} {f : Mph B C} {g : Mph A B} -> Iso f -> Iso g -> Iso (f ∘ g)
-  iso-composition {f = f} {g} (iso f⁻¹ f⁻¹f=id ff⁻¹=id) (iso g⁻¹ g⁻¹g=id gg⁻¹=id) =
+  iso-composition {f = f} {g} (iso f⁻¹ (f⁻¹f=id , ff⁻¹=id)) (iso g⁻¹ (g⁻¹g=id , gg⁻¹=id)) =
     iso (g⁻¹ ∘ f⁻¹)
-        (assocLR =>>= ((g⁻¹ ∘_) $= (assocRL =>>= ((_∘ g  ) $= f⁻¹f=id) =>>= left-id)) =>>= g⁻¹g=id)
-        (assocLR =>>= ((f   ∘_) $= (assocRL =>>= ((_∘ f⁻¹) $= gg⁻¹=id) =>>= left-id)) =>>= ff⁻¹=id)
+      ( assocLR =>>= ((g⁻¹ ∘_) $= (assocRL =>>= ((_∘ g  ) $= f⁻¹f=id) =>>= left-id)) =>>= g⁻¹g=id
+      , assocLR =>>= ((f   ∘_) $= (assocRL =>>= ((_∘ f⁻¹) $= gg⁻¹=id) =>>= left-id)) =>>= ff⁻¹=id
+      )
 
   mono-composition : {A B C : Obj} {f : Mph B C} {g : Mph A B} -> Mono f -> Mono g -> Mono (f ∘ g)
   mono-composition {f = f} {g = g} mf mg =
@@ -139,7 +142,7 @@ module morphisms {k l : Level} (𝒞 : Category k l) where
     ∎
 
   iso-uniqueness : {A B : Obj} {f : Mph A B} {α β : Iso f} -> α ≡ β
-  iso-uniqueness {A} {B} {f} {α @(iso g gf=id fg=id)} {β @(iso h hf=id fh=id)} with inverse-uniqueness gf=id fh=id
+  iso-uniqueness {A} {B} {f} {α @(iso g (gf=id , fg=id))} {β @(iso h (hf=id , fh=id))} with inverse-uniqueness gf=id fh=id
   ... | refl = helper (eqUnicity , eqUnicity)
    where
     helper : (gf=id ≡ hf=id) × (fg=id ≡ fh=id) -> α ≡ β

@@ -70,8 +70,8 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
       u21 = MorphismReduction.u r21
     in r12 , record
                { inverse = u21
-               ; leftInverse  = proveId1 (composeMorphismReductions r21 r12)
-               ; rightInverse = proveId2 (composeMorphismReductions r12 r21)
+               ; evidence = proveId1 (composeMorphismReductions r21 r12)
+                          , proveId2 (composeMorphismReductions r12 r21)
                }
 
 
@@ -126,8 +126,8 @@ module equalizers {n m : Level} (𝒞 : Category n m) where
 
       iso-e : Iso e
       iso-e with equalizer_uniqueness idEq eq
-      ... | (reduceMorphismBy d witnessedBy ed=id , iso d⁻¹ d⁻¹d=id dd⁻¹=id) =
-        case d⁻¹=e of λ { refl -> iso d dd⁻¹=id d⁻¹d=id } where
+      ... | (reduceMorphismBy d witnessedBy ed=id , iso d⁻¹ (d⁻¹d=id , dd⁻¹=id)) =
+        case d⁻¹=e of λ { refl -> iso d (dd⁻¹=id , d⁻¹d=id) } where
           d⁻¹=e = flipEq left-id =>>= ((_∘ d⁻¹) $= flipEq ed=id) =>>= assocLR =>>= ((e ∘_) $= dd⁻¹=id) =>>= right-id
 
   section_is_equalizer : {A B : Obj} {s : Mph A B} (sec : Section s) -> Equalizer (s ∘ Section.retraction sec) id s
