@@ -69,8 +69,9 @@ op-involution {𝒞 = 𝒞} = op-op-𝒞=𝒞 where
   op-op-𝒞=𝒞 = (λ (a : {A B C D : Obj 𝒞} {f : Mph 𝒞 C D} {g : Mph 𝒞 B C} {h : Mph 𝒞 A B} -> (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)) -> category (Obj 𝒞) (Mph 𝒞) (id 𝒞) (_∘_) (left-id 𝒞) (right-id 𝒞) a) $= op-op-assoc=assoc
 
 -- Product of categories.
-_⨂_ : {nc mc nd md : Level} (𝒞 : Category nc mc) (𝒟 : Category nd md) -> Category (nc ⊔ nd) (mc ⊔ md)
-𝒞 ⨂ 𝒟 = category
+-- Unicode symbol U+2A09.
+_⨉_ : {nc mc nd md : Level} (𝒞 : Category nc mc) (𝒟 : Category nd md) -> Category (nc ⊔ nd) (mc ⊔ md)
+𝒞 ⨉ 𝒟 = category
   (Obj 𝒞 × Obj 𝒟)
   (λ { (C₁ , D₁) (C₂ , D₂) → Mph 𝒞 C₁ C₂ × Mph 𝒟 D₁ D₂ })
   (id 𝒞 , id 𝒟)

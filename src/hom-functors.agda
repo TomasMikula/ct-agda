@@ -4,7 +4,7 @@ open import category
 open import functor
 open import SET
 
-Hom : {k l : Level} (𝒞 : Category k l) -> (op 𝒞 ⨂ 𝒞) => SET l
+Hom : {k l : Level} (𝒞 : Category k l) -> (op 𝒞 ⨉ 𝒞) => SET l
 Hom 𝒞 = record
   { mapObj = λ { (A , B) → Mph A B }
   ; mapArr = λ { (f , h) g → h ∘ (g ∘ f) }
@@ -15,7 +15,7 @@ Hom 𝒞 = record
   open Category 𝒞
 
 _-Hom-_ : {kc lc kd ld ka la : Level} {𝒞 : Category kc lc} {𝒟 : Category kd ld} {𝒜 : Category ka la} ->
-          (𝒞 => 𝒜) -> (𝒟 => 𝒜) -> (op 𝒞 ⨂ 𝒟) => SET la
+          (𝒞 => 𝒜) -> (𝒟 => 𝒜) -> (op 𝒞 ⨉ 𝒟) => SET la
 _-Hom-_ {𝒞 = 𝒞} {𝒟 = 𝒟} {𝒜 = 𝒜} F G = record
   { mapObj = λ { (C , D) -> Mph (FObj C) (GObj D) }
   ; mapArr = λ { (f , h) g → GArr h ∘ (g ∘ FArr f) }
