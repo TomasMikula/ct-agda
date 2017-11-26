@@ -41,7 +41,7 @@ record Adjoint {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} (L : 
 homset-to-units-adjunction : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
                              HomsetAdjoint L R -> UnitCounitAdjoint L R
 homset-to-units-adjunction {𝒞 = 𝒞} {𝒟 = 𝒟} {L = L} {R = R}
-                           hs-adj @ (homsetAdjoint (natEquiv ε witnessedBy ε-nat and ε-iso)) = record
+                           hs-adj @ (homsetAdjoint (natEquiv ε witnessedBy (ε-nat , ε-iso))) = record
   { 𝜆 = natTrans ε⁻¹ (id 𝒞) witnessedBy 𝜆-nat
   ; ρ = natTrans ε   (id 𝒟) witnessedBy ρ-nat
   ; 𝜆L⦿Lρ=1 = equalNatTrans (extensionality' ε⁻¹[1]∘L[ε[1]]≡1)
@@ -116,15 +116,16 @@ units-to-homset-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor 
                             L-𝟙    𝜆L⦿Lρ=1
                             R-𝟙    R𝜆⦿ρR=1) =
   homsetAdjoint (
-    natEquiv (λ φ → Rm φ ∘𝒞 ρ)
-      witnessedBy (λ {(f , g) → extensionality λ φ ->
-        R-cmp =∘𝒞 ρ =>>= (assocC =>>= (Rm g ∘𝒞= (R-cmp =∘𝒞 ρ =>>= (assocC =>>= (Rm φ ∘𝒞= flipEq (ρ-nat f)) =>>= assocC'))))
-      })
-      and λ { {X , Y} ->
+    natEquiv (λ φ → Rm φ ∘𝒞 ρ) witnessedBy
+      ( (λ {(f , g) → extensionality λ φ ->
+          R-cmp =∘𝒞 ρ =>>= (assocC =>>= (Rm g ∘𝒞= (R-cmp =∘𝒞 ρ =>>= (assocC =>>= (Rm φ ∘𝒞= flipEq (ρ-nat f)) =>>= assocC'))))
+        })
+      , λ { {X , Y} ->
         iso (λ ψ -> 𝜆 ∘𝒟 Lm ψ)
             (extensionality λ φ -> 𝜆 ∘𝒟= L-cmp =>>= assocD' =>>= 𝜆-nat φ =∘𝒟 Lm ρ =>>= assocD =>>= φ ∘𝒟= (NatTrans.τ $= 𝜆L⦿Lρ=1 =$' X) =>>= r-idD)
             (extensionality λ ψ -> R-cmp =∘𝒞 ρ =>>= assocC =>>= (Rm 𝜆 ∘𝒞= flipEq (ρ-nat ψ)) =>>= assocC' =>>= NatTrans.τ $= R𝜆⦿ρR=1 =$' Y =∘𝒞 ψ =>>= l-idC)
-      }
+        }
+      )
   )
  where
   open Category 𝒞 using () renaming (_∘_ to _∘𝒞_ ; _=∘_ to _=∘𝒞_ ; _∘=_ to _∘𝒞=_ ; assoc to assocC ; assocRL to assocC' ; left-id to l-idC)
@@ -133,7 +134,7 @@ units-to-homset-adjunction {𝒞 = 𝒞} {𝒟} {functor _ Lm _ L-cmp} {functor 
 
 homset-to-units-to-homset-is-id : {k l m : Level} {𝒞 : Category k m} {𝒟 : Category l m} {L : 𝒞 => 𝒟} {R : 𝒟 => 𝒞} ->
                                   (A : HomsetAdjoint L R) -> units-to-homset-adjunction (homset-to-units-adjunction A) ≡ A
-homset-to-units-to-homset-is-id {𝒞 = 𝒞} {𝒟} {functor _ Lm L-id _} {functor _ Rm _ _} (homsetAdjoint (natEquiv ε witnessedBy ε-nat and ε-iso)) =
+homset-to-units-to-homset-is-id {𝒞 = 𝒞} {𝒟} {functor _ Lm L-id _} {functor _ Rm _ _} (homsetAdjoint (natEquiv ε witnessedBy (ε-nat , ε-iso))) =
   homsetAdjoint $= equalNatEquivs (extensionality' (extensionality λ φ ->
     Rm φ  ∘𝒞   ε (id 𝒟)                    =[ flipEq (right-id 𝒞) =>>= assoc 𝒞 ]>
     Rm φ  ∘𝒞  (ε (id 𝒟)  ∘𝒞     id 𝒞 )     <[ ε-nat (id 𝒞 , φ) =$ id 𝒟 ]=

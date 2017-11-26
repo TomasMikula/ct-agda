@@ -119,8 +119,9 @@ liftF {m = m} (functor Fo Fm F-id F-cmp) {n} =
 -- Yoneda lemma as a natural equivalence.
 YonedaEquiv : ∀ {k l} {𝒞 : Category k l} (F : (op 𝒞) => (SET l)) -> NatEquiv (liftF F) (Hom-to-F F)
 YonedaEquiv {𝒞 = 𝒞} F@(functor _ _ _ F-cmp) =
-  natEquiv (λ {B} b -> Y-trans' F B b)
-    witnessedBy (λ f -> extensionality λ { (lift b) ->
-      equalNatTrans (extensionality' (extensionality λ g -> flipEq F-cmp =$ b))
-    })
-    and λ {A} -> Yoneda' F A
+  natEquiv (λ {B} b -> Y-trans' F B b) witnessedBy
+    ( (λ f -> extensionality λ { (lift b) ->
+        equalNatTrans (extensionality' (extensionality λ g -> flipEq F-cmp =$ b))
+      })
+    , λ {A} -> Yoneda' F A
+    )

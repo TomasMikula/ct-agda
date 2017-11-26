@@ -5,16 +5,24 @@ open import category
 open import functor
 import morphisms
 
+open Category using (Obj ; Mph)
+
+Natural : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F G : Functor 𝒞 𝒟)
+          (τ : {A : Obj 𝒞} -> Mph 𝒟 (Functor.mapObj F A) (Functor.mapObj G A)) -> Set (nc ⊔ mc ⊔ md)
+Natural {𝒞 = 𝒞} {𝒟 = 𝒟} (functor _ F _ _) (functor _ G _ _) τ =
+  {A B : Obj 𝒞} -> (f : Mph 𝒞 A B) -> τ ∘ (F f) ≡ (G f) ∘ τ
+ where
+  open Category 𝒟 using (_∘_)
+
 -- Natural transformation.
 record NatTrans {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F G : Functor 𝒞 𝒟) : Set (nc ⊔ mc ⊔ nd ⊔ md) where
   constructor natTrans_witnessedBy_
-  open Category hiding (_∘_)
   open Category 𝒟 using (_∘_)
   open Functor F renaming (mapObj to Fobj ; mapArr to Farr)
   open Functor G renaming (mapObj to Gobj ; mapArr to Garr)
   field
     τ : {A : Obj 𝒞} -> Mph 𝒟 (Fobj A) (Gobj A)
-    naturality : {A B : Obj 𝒞} (f : Mph 𝒞 A B) -> τ ∘ (Farr f) ≡ (Garr f) ∘ τ
+    naturality : Natural F G τ
 
 -- ∸ is Unicode symbol U+2238
 syntax NatTrans F G = F ∸> G
@@ -25,7 +33,6 @@ _⦿_ : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F
       NatTrans G H -> NatTrans F G -> NatTrans F H
 _⦿_ {𝒞 = 𝒞} {𝒟 = 𝒟} {F} {G} {H} (natTrans τ witnessedBy τ-naturality) (natTrans σ witnessedBy σ-naturality) =
   natTrans (τ ∘ σ) witnessedBy naturality where
-    open Category using (Obj ; Mph)
     open Category 𝒟 using (_∘_ ; assocLR ; assocRL)
     open Functor F renaming (mapArr to Farr)
     open Functor H renaming (mapArr to Harr)
@@ -88,9 +95,16 @@ _⧀_ : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd 
 functor H HArr H-id H-cmp ⧀ (natTrans τ witnessedBy τ-nat) =
   natTrans HArr τ witnessedBy λ f -> flipEq H-cmp =>>= (HArr $= τ-nat _) =>>= H-cmp
 
+NaturalIso : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F G : Functor 𝒞 𝒟)
+             (τ : {A : Obj 𝒞} -> Mph 𝒟 (Functor.mapObj F A) (Functor.mapObj G A)) -> Set (nc ⊔ mc ⊔ md)
+NaturalIso {𝒞 = 𝒞} {𝒟 = 𝒟} F G τ =
+  (Natural F G τ) × ({A : Obj 𝒞} -> Iso (τ {A}))
+ where
+  open morphisms 𝒟
+
 -- Natural equivalence.
 record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F G : Functor 𝒞 𝒟) : Set (nc ⊔ mc ⊔ nd ⊔ md) where
-  constructor natEquiv_witnessedBy_and_
+  constructor natEquiv_witnessedBy_
   open Category using (Obj ; Mph)
   open Category 𝒟 using (_∘_ ; assocLR ; assocRL ; left-id ; right-id)
   open Functor F renaming (mapObj to Fobj ; mapArr to Farr)
@@ -99,14 +113,15 @@ record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
 
   field
     τ : {A : Obj 𝒞} -> Mph 𝒟 (Fobj A) (Gobj A)
-    naturality : {A B : Obj 𝒞} (f : Mph 𝒞 A B) -> τ ∘ (Farr f) ≡ (Garr f) ∘ τ
-    isomorphic : {A : Obj 𝒞} -> Iso (τ {A})
+    naturalIso : NaturalIso F G τ
+
+  naturality = Σ.proj₁ naturalIso
+  isomorphic = Σ.proj₂ naturalIso
 
   reverse : NatEquiv G F
   reverse = record
     { τ = rev-τ
-    ; naturality = rev-nat
-    ; isomorphic = Iso.reverse isomorphic
+    ; naturalIso = (rev-nat , Iso.reverse isomorphic)
     }
    where
     rev-τ : {A : Obj 𝒞} → Mph 𝒟 (Gobj A) (Fobj A)
@@ -120,7 +135,7 @@ record NatEquiv {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category n
 
   rev-trans : NatTrans G F
   rev-trans with reverse
-  ... | record { τ = ρ ; naturality = ρ-nat ; isomorphic = ρ-iso } = natTrans ρ witnessedBy ρ-nat
+  ... | record { τ = ρ ; naturalIso = (ρ-nat , ρ-iso) } = natTrans ρ witnessedBy ρ-nat
 
 syntax NatEquiv F G = F <∸> G
 
@@ -128,7 +143,7 @@ syntax NatEquiv F G = F <∸> G
 equalNatEquivs : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} {F G : Functor 𝒞 𝒟}
                  {α β : F <∸> G} -> NatTransEqWitness (NatEquiv.trans α) (NatEquiv.trans β) -> α ≡ β
 equalNatEquivs {𝒞 = 𝒞} {𝒟 = 𝒟} {functor _ F _ _} {functor _ G _ _}
-               {α' @(natEquiv α witnessedBy α-nat and α-iso)} {β' @(natEquiv .α witnessedBy β-nat and β-iso)} w @refl with equalNatTrans {α = NatEquiv.trans α'} {β = NatEquiv.trans β'} w
+               {α' @(natEquiv α witnessedBy (α-nat , α-iso))} {β' @(natEquiv .α witnessedBy (β-nat , β-iso))} w @refl with equalNatTrans {α = NatEquiv.trans α'} {β = NatEquiv.trans β'} w
 ... | refl = res where
   open Category
   open morphisms 𝒟
