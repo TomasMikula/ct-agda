@@ -48,6 +48,15 @@ _⦾_ : {n₁ m₁ n₂ m₂ n₃ m₃ : Level} {𝒞₁ : Category n₁ m₁} {
   ; composition = (Fm $= G-cmp) =>>= F-cmp
   }
 
+-- Parallel functor composition.
+_||_ : ∀ {ka la kb lb kc lc kd ld} {𝓐 : Category ka la} {𝓑 : Category kb lb} {𝓒 : Category kc lc} {𝓓 : Category kd ld} ->
+       (𝓐 => 𝓑) -> (𝓒 => 𝓓) -> ((𝓐 ⨉ 𝓒) => (𝓑 ⨉ 𝓓))
+(functor Fo Fm F-id F-cmp) || (functor Go Gm G-id G-cmp) = functor
+  (λ { (A , C) → (Fo A , Go C) })
+  (λ { (f , g) → (Fm f , Gm g) })
+  (F-id =,= G-id)
+  (F-cmp =,= G-cmp)
+
 -- Data witnessing equality of functors.
 FunctorEqWitness : {n₁ m₁ n₂ m₂ : Level} {𝒞₁ : Category n₁ m₁} {𝒞₂ : Category n₂ m₂}
                    (F G : 𝒞₁ => 𝒞₂) -> Set (n₁ ⊔ n₂ ⊔ m₁ ⊔ m₂)

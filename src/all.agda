@@ -5,3 +5,4 @@ import limits
 import yoneda
 import adjunction
 import special-monos
+import monoidal
