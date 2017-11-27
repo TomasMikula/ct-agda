@@ -85,15 +85,31 @@ right-id-⦿ {𝒟 = 𝒟} = equalNatTrans (extensionality' right-id) where open
 -- Unicode symbol U+29C1.
 _⧁_ : {nb mb nc mc nd md : Level} {𝓑 : Category nb mb} {𝓒 : Category nc mc} {𝓓 : Category nd md} ->
        {F G : 𝓒 => 𝓓} -> (F ∸> G) -> (K : 𝓑 => 𝓒) -> ((F ⦾ K) ∸> (G ⦾ K))
-(natTrans τ witnessedBy τ-nat) ⧁ K = natTrans (λ {A} -> τ {KObj A}) witnessedBy λ f -> τ-nat (KArr f) where
-  open Functor K renaming (mapObj to KObj ; mapArr to KArr)
+(natTrans τ witnessedBy τ-nat) ⧁ (functor Ko Km _ _) =
+  natTrans (λ {A} -> τ {Ko A}) witnessedBy (λ f -> τ-nat (Km f))
 
 -- Composition of functor and natural transformation.
 -- Unicode symbol U+29C0.
 _⧀_ : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd md} {𝓔 : Category ne me} ->
-       {F G : 𝓒 => 𝓓} -> (H : 𝓓 => 𝓔) -> (F ∸> G) -> ((H ⦾ F) ∸> (H ⦾ G))
-functor H HArr H-id H-cmp ⧀ (natTrans τ witnessedBy τ-nat) =
-  natTrans HArr τ witnessedBy λ f -> flipEq H-cmp =>>= (HArr $= τ-nat _) =>>= H-cmp
+      {F G : 𝓒 => 𝓓} -> (H : 𝓓 => 𝓔) -> (F ∸> G) -> ((H ⦾ F) ∸> (H ⦾ G))
+(functor _ Hm _ H-cmp) ⧀ (natTrans τ witnessedBy τ-nat) =
+  natTrans Hm τ witnessedBy λ f -> flipEq H-cmp =>>= (Hm $= τ-nat _) =>>= H-cmp
+
+-- Horizontal composition of natural transformations
+_<⦿>_ : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd md} {𝓔 : Category ne me} ->
+        {F G : 𝓒 => 𝓓} -> {H J : 𝓓 => 𝓔} -> (H ∸> J) -> (F ∸> G) -> ((H ⦾ F) ∸> (J ⦾ G))
+_<⦿>_ {F = F} {G} {H} {J} β α = (β ⧁ G) ⦿ (H ⧀ α)
+
+-- Equivalent definition of horizontal composition.
+_<⦿'>_ : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd md} {𝓔 : Category ne me} ->
+         {F G : 𝓒 => 𝓓} -> {H J : 𝓓 => 𝓔} -> (H ∸> J) -> (F ∸> G) -> ((H ⦾ F) ∸> (J ⦾ G))
+_<⦿'>_ {F = F} {G} {H} {J} β α = (J ⧀ α) ⦿ (β ⧁ F)
+
+-- Proof the the two definitions of horizontal composition result in the same natural transformation.
+<⦿>=<⦿'> : {nc mc nd md ne me : Level} {𝓒 : Category nc mc} {𝓓 : Category nd md} {𝓔 : Category ne me} ->
+           {F G : 𝓒 => 𝓓} -> {H J : 𝓓 => 𝓔} -> (β : H ∸> J) -> (α : F ∸> G) -> β <⦿> α ≡ β <⦿'> α
+<⦿>=<⦿'> {𝓒 = 𝓒} {𝓓} {𝓔} (natTrans β witnessedBy β-nat) (natTrans α witnessedBy α-nat) =
+  equalNatTrans (extensionality' (β-nat α))
 
 NaturalIso : {nc mc nd md : Level} {𝒞 : Category nc mc} {𝒟 : Category nd md} (F G : Functor 𝒞 𝒟)
              (τ : {A : Obj 𝒞} -> Mph 𝒟 (Functor.mapObj F A) (Functor.mapObj G A)) -> Set (nc ⊔ mc ⊔ md)
