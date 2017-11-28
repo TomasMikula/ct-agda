@@ -43,6 +43,9 @@ refl ~$' a = refl
 _=,=_ : {n m : Level} {A : Set n} {B : Set m} {a1 a2 : A} {b1 b2 : B} -> a1 ≡ a2 -> b1 ≡ b2 -> (a1 , b1) ≡ (a2 , b2)
 refl =,= refl = refl
 
+Σ= : {n m : Level} {A : Set n} {B : A -> Set m} {a1 a2 : A} {b1 : B a1} {b2 : B a2} -> Σ (a1 ≡ a2) (λ { refl -> b1 ≡ b2 }) -> (a1 , b1) ≡ (a2 , b2)
+Σ= (refl , refl) = refl
+
 -- QED. U+220E
 _∎ : {a : Level} {A : Set a} (x : A) -> x ≡ x
 x ∎ = refl

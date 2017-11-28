@@ -7,3 +7,4 @@ import adjunction
 import special-monos
 import monoidal
 import monad
+import f-algebra
